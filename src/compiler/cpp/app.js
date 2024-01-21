@@ -29,7 +29,7 @@ export class App {
 
     this.ready = WebAssembly.instantiate(module, {
       wasi_unstable, env,
-      test: () => {
+      testFn: () => {
         console.log("test")
       },
     }).then((instance) => {

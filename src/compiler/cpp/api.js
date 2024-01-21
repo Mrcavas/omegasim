@@ -3,9 +3,9 @@ import { MemFS } from './memfs'
 import { msToSec } from './shared'
 import { Tar } from './tar'
 
-import clangUrl from '../../../../omegasim/src/compiler/assets/clang.wasm?url'
-import lldUrl from '../../../../omegasim/src/compiler/assets/lld.wasm?url'
-import sysrootUrl from '../../../../omegasim/src/compiler/assets/sysroot.tar?url'
+import clangUrl from '../../compiler/assets/clang.wasm?url'
+import lldUrl from '../../compiler/assets/lld.wasm?url'
+import sysrootUrl from '../../compiler/assets/sysroot.tar?url'
 
 export class API {
   constructor(options) {

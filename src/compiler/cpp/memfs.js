@@ -1,7 +1,7 @@
 import { AbortError } from './errors.js'
 import { Memory } from './memory'
 import { assert, ESUCCESS, getImportObject } from './shared'
-import memfsUrl from '../../../../omegasim/src/compiler/assets/memfs.wasm?url'
+import memfsUrl from '../../compiler/assets/memfs.wasm?url'
 
 export class MemFS {
   constructor(options) {
