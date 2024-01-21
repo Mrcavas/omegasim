@@ -15,6 +15,8 @@ export const useRunner = create(
       worker: null,
       onWrite: console.log,
       setOnWrite: (onWrite) => set({ ...get(), onWrite}),
+      clearLogs: () => {},
+      setClearLogs: (clearLogs) => set({ ...get(), clearLogs}),
       code: defaultCode,
       setCode: (code) => set({ ...get(), code }),
       init() {
