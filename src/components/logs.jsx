@@ -8,16 +8,20 @@ export default function Logs({ className }) {
 
   useEffect(() => {
     setOnWrite(msg => {
-      setText(text => `${text}\n${new Ansi().toHtml(msg)}`)
+      setText(text => `${text}\n${msg}`)
     })
     setClearLogs(() => {
       setText("")
     })
   }, [])
 
+  // useEffect(() => {
+  //   console.log(text)
+  // }, [text])
+
   return <div className={"h-full overflow-auto " + (className ?? "")}>
     <div className="whitespace-pre-line" dangerouslySetInnerHTML={{
-      __html: text
+      __html: new Ansi().toHtml(text),
     }} />
   </div>
 }

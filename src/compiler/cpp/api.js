@@ -116,6 +116,7 @@ export class API {
       'wasm-ld',
       '--no-threads',
       '--export-dynamic', // TODO required?
+      "--allow-undefined",
       '-z',
       `stack-size=${stackSize}`,
       `-L${libdir}`,
@@ -137,7 +138,7 @@ export class API {
     return stillRunning ? app : null
   }
 
-  async compileLinkRun(contents) {
+  async compileLinkRun(contents, imports) {
     const input = `test.cc`
     const obj = `test.o`
     const wasm = `test.wasm`
@@ -147,6 +148,7 @@ export class API {
     const buffer = this.memfs.getFileContents(wasm)
     const testMod = await WebAssembly.compile(buffer)
 
+    testMod.imports = imports
     return await this.run(testMod, wasm)
   }
 }

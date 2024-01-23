@@ -11,7 +11,7 @@ export class App {
     this.handles = new Map()
     this.nextHandle = 0
 
-    const env = getImportObject(this)
+    const env = module.imports ?? {}
 
     const wasi_unstable = getImportObject(this, [
       "proc_exit",
@@ -27,12 +27,7 @@ export class App {
     // Fill in some WASI implementations from memfs.
     Object.assign(wasi_unstable, this.memfs.exports)
 
-    this.ready = WebAssembly.instantiate(module, {
-      wasi_unstable, env,
-      testFn: () => {
-        console.log("test")
-      },
-    }).then((instance) => {
+    this.ready = WebAssembly.instantiate(module, { wasi_unstable, env }).then((instance) => {
       this.exports = instance.exports
       this.mem = new Memory(this.exports.memory)
       this.memfs.hostMem = this.mem
@@ -70,11 +65,6 @@ export class App {
       // Propagate error.
       throw exn
     }
-  }
-
-  test(arg) {
-    console.log("test executed with", arg)
-    return 0
   }
 
   proc_exit(code) {
