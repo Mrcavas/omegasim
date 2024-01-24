@@ -13,23 +13,11 @@ import Logs from "./components/logs.jsx"
 
 console.log({ clang, lld, memfs, sysroot })
 export default function App() {
-  const { init, runCode, clearLogs, registerImport, restart } = useRunner(({
-                                                                             init,
-                                                                             runCode,
-                                                                             clearLogs,
-                                                                             registerImport,
-                                                                             restart,
-                                                                           }) => ({
-    init, runCode, clearLogs, registerImport, restart,
+  const { init, runCode, clearLogs, restart } = useRunner(({ init, runCode, clearLogs, restart }) => ({
+    init, runCode, clearLogs, restart,
   }))
 
-  useEffect(() => {
-    init()
-    registerImport(function testFn(n = 1) {
-      console.log("test function called with", n)
-      return n * 2
-    })
-  }, [])
+  useEffect(init, [])
 
   return (
     <Splitter className="h-full">

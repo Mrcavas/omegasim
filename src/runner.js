@@ -1,15 +1,16 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import CppWorker from "./compiler/cpp/worker?worker"
+import PhysWorker from "./physics/worker?worker"
 
 const defaultCode = `#include <stdio.h>
+#include <Omega.h>
 
-extern "C" void alert();
+extern "C" uint64_t millis();
 
 int main() {
     
     printf("Hello, world from C++!");
-    alert();
 
     return 0;
 }`
@@ -17,62 +18,58 @@ int main() {
 export const useRunner = create(
   persist(
     (set, get) => ({
-      worker: null,
+      cpp: null,
+      phys: null,
       onWrite: console.log,
       setOnWrite: (onWrite) => set({ ...get(), onWrite }),
-      clearLogs: () => {
-      },
+      clearLogs: null,
       setClearLogs: (clearLogs) => set({ ...get(), clearLogs }),
       code: defaultCode,
       setCode: (code) => set({ ...get(), code }),
       init() {
         set((state) => {
-          const worker = new CppWorker()
-          const messageChannel = new MessageChannel()
+          const cpp = new CppWorker()
+          const cppChannel = new MessageChannel()
 
-          worker.postMessage({ id: "constructor", data: messageChannel.port2 }, [messageChannel.port2])
-          messageChannel.port1.onmessage = event => {
+          const phys = new PhysWorker()
+          const physChannel = new MessageChannel()
+
+          cpp.postMessage({ id: "constructor", data: cppChannel.port2, }, [cppChannel.port2])
+          phys.postMessage({ id: "constructor", data: physChannel.port2, }, [physChannel.port2])
+
+          const messageHandler = event => {
+            if (event.data.id === "to_phys") {
+              phys.postMessage(event.data.message)
+            }
+
+            if (event.data.id === "to_cpp") {
+              cpp.postMessage(event.data.message)
+            }
+
             if (event.data.id === "write") {
               const { onWrite } = get()
               onWrite(event.data.data)
             }
-            if (event.data.id === "call") {
-              const { imports } = get()
-              messageChannel.port1.postMessage({
-                id: "callback",
-                result: imports[event.data.name]()
-              })
-              console.log("sent callback")
-            }
-            if (event.data.id === "alert") alert("а вот тут уже с++ запустил alert в браузере)")
           }
+
+          cppChannel.port1.onmessage = messageHandler
+          physChannel.port1.onmessage = messageHandler
 
           return {
             ...state,
-            worker: { messagePort: messageChannel.port1, worker },
+            cpp: { port: cppChannel.port1, worker: cpp },
+            phys: { port: physChannel.port1, worker: phys },
           }
         })
       },
       restart() {
-        const { worker, init } = get()
-        worker.worker.terminate()
+        const { cpp, init } = get()
+        cpp.worker.terminate()
         init()
       },
       runCode() {
-        const { code, worker } = get()
-        worker.messagePort.postMessage({ id: "compileLinkRun", data: code })
-      },
-      imports: {},
-      registerImport: (fn) => {
-        const { worker } = get()
-        worker.messagePort.postMessage({ id: "registerImport", name: fn.name })
-        set((state) => ({
-          ...state,
-          imports: {
-            ...state.imports,
-            [fn.name]: fn
-          }
-        }))
+        const { code, cpp } = get()
+        cpp.port.postMessage({ id: "run_code", data: code })
       },
     }),
     { name: "runner-store", version: 2, blacklist: ["worker"] },

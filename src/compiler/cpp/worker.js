@@ -1,68 +1,33 @@
-import { API } from './api'
+import { API } from "./api"
 
 let api
 let port
-let imports = {
+
+let state
+
+const sendMain = message => port.postMessage(message)
+const sendPhys = message => port.postMessage({ id: "to_phys", message })
+
+const imports = {
   millis: () => BigInt(Date.now()),
-  alert: () => port.postMessage({ id: "alert" }),
-  random_get: () => {
-    const r = Math.random()
-    console.log(r)
-    return r
-  }
-}
-let result = null
- 
-let currentApp = null
-// let time
-
-
-
-const onAnyMessage = async (event) => {
-  console.log(event.data.id)
-  switch (event.data.id) {
-    case 'constructor':
-      port = event.data.data
-      port.onmessage = onAnyMessage
-      api = new API({
-        hostWrite: msg => port.postMessage({
-          id: "write",
-          data: msg
-        })
-      })
-
-      break
-
-    case "callback":
-      result = event.data.result
-      console.log(result)
-      break
-
-    case "registerImport":
-      imports = {
-        ...imports,
-        [event.data.name]: () => {
-          port.postMessage({
-            id: "call",
-            name: event.data.name
-          })
-
-          // ждём ответ
-
-          console.log("got result:", result)
-          result = null
-
-          return 10
-        }
-      }
-
-      break
-
-    case 'compileLinkRun':
-      currentApp = await api.compileLinkRun(event.data.data, imports)
-      console.log(`finished compileLinkRun. currentApp = ${currentApp}.`)
-      break
-  }
+  getTestData: () => state.testData
 }
 
-self.addEventListener('message', onAnyMessage)
+self.addEventListener("message", async function messageHandler(event) {
+  if (event.data.id === "constructor") {
+    port = event.data.data
+    port.onmessage = messageHandler
+
+    api = new API({
+      hostWrite: msg => sendMain({ id: "write", data: msg }),
+    })
+  }
+
+  if (event.data.id === "run_code") {
+    await api.compileLinkRun(event.data.data, imports)
+  }
+
+  if (event.data.id === "state_update") {
+    state = event.data.data
+  }
+})
