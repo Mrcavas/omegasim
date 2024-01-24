@@ -5,7 +5,7 @@ let port
 let imports = {
   millis: () => BigInt(Date.now()),
   alert: () => port.postMessage({ id: "alert" }),
-  random_js: () => {
+  rand: () => {
     const r = Math.random()
     console.log(r)
     return r
