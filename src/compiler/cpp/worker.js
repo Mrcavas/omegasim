@@ -9,8 +9,7 @@ const sendMain = message => port.postMessage(message)
 const sendPhys = message => port.postMessage({ id: "to_phys", message })
 
 const imports = {
-  millis: () => BigInt(Date.now()),
-  getTestData: () => state.testData
+  millis: () => BigInt(Date.now())
 }
 
 self.addEventListener("message", async function messageHandler(event) {

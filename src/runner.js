@@ -26,7 +26,7 @@ export const useRunner = create(
       setClearLogs: (clearLogs) => set({ ...get(), clearLogs }),
       code: defaultCode,
       setCode: (code) => set({ ...get(), code }),
-      init() {
+      init(canvas, initResizeHandler) {
         set((state) => {
           const cpp = new CppWorker()
           const cppChannel = new MessageChannel()
@@ -34,8 +34,16 @@ export const useRunner = create(
           const phys = new PhysWorker()
           const physChannel = new MessageChannel()
 
-          cpp.postMessage({ id: "constructor", data: cppChannel.port2, }, [cppChannel.port2])
-          phys.postMessage({ id: "constructor", data: physChannel.port2, }, [physChannel.port2])
+          cpp.postMessage({ id: "constructor", data: cppChannel.port2 }, [cppChannel.port2])
+
+          const offscreenCanvas = canvas.transferControlToOffscreen()
+          // initResizeHandler(offscreenCanvas)
+
+          phys.postMessage({
+            id: "constructor",
+            data: physChannel.port2,
+            canvas: offscreenCanvas,
+          }, [physChannel.port2, offscreenCanvas])
 
           const messageHandler = event => {
             if (event.data.id === "to_phys") {

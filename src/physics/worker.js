@@ -1,4 +1,5 @@
 let port
+let canvas, context
 
 const sendMain = message => port.postMessage(message)
 const sendCpp = message => port.postMessage({ id: "to_cpp", message })
@@ -8,19 +9,15 @@ self.addEventListener("message", async function messageHandler(event) {
     port = event.data.data
     port.onmessage = messageHandler
 
-    let start = Date.now();
+    canvas = event.data.canvas
+    context = canvas.getContext("2d")
+  }
 
-    setInterval(() => {
-      const now = Date.now()
-      console.log(now - start)
-      start = Date.now()
+  if (event.data.id === "canvas_resize") {
+    canvas.width = event.data.width
+    canvas.height = event.data.height
 
-      sendCpp({
-        id: "state_update",
-        data: {
-          testData: Math.random(),
-        },
-      })
-    })
+    context.fillStyle = "red"
+    context.fillRect(0, 0, canvas.width, canvas.height)
   }
 })
