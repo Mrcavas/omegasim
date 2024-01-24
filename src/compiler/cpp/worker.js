@@ -5,10 +5,14 @@ let port
 let imports = {
   millis: () => BigInt(Date.now()),
   alert: () => port.postMessage({ id: "alert" }),
-  random: () => Math.random()
+  random: () => {
+    const r = Math.random()
+    console.log(r)
+    return r
+  }
 }
 let result = null
-
+ 
 let currentApp = null
 // let time
 
