@@ -4,13 +4,23 @@ import CppWorker from "./compiler/cpp/worker?worker"
 import PhysWorker from "./physics/worker?worker"
 
 const defaultCode = `#include <stdio.h>
-#include <Omega.h>
+
+extern "C" void addRectangle(int x, int y, int w, int h);
 
 extern "C" uint64_t millis();
 
 int main() {
-    
-    printf("Hello, world from C++!");
+    uint64_t start = millis();
+
+    while (true) {
+        while (millis() - start < 1000) printf("");
+
+        addRectangle(
+            400, 200, 80, 80
+        );
+
+        start = millis();
+    }
 
     return 0;
 }`
@@ -37,7 +47,6 @@ export const useRunner = create(
           cpp.postMessage({ id: "constructor", data: cppChannel.port2 }, [cppChannel.port2])
 
           const offscreenCanvas = canvas.transferControlToOffscreen()
-          // initResizeHandler(offscreenCanvas)
 
           phys.postMessage({
             id: "constructor",
@@ -47,11 +56,11 @@ export const useRunner = create(
 
           const messageHandler = event => {
             if (event.data.id === "to_phys") {
-              phys.postMessage(event.data.message)
+              physChannel.port1.postMessage(event.data.message)
             }
 
             if (event.data.id === "to_cpp") {
-              cpp.postMessage(event.data.message)
+              cppChannel.port1.postMessage(event.data.message)
             }
 
             if (event.data.id === "write") {
@@ -80,6 +89,6 @@ export const useRunner = create(
         cpp.port.postMessage({ id: "run_code", data: code })
       },
     }),
-    { name: "runner-store", version: 2, blacklist: ["worker"] },
+    { name: "runner-store", version: 3, blacklist: ["cpp", "phys"] },
   ),
 )

@@ -9,7 +9,13 @@ const sendMain = message => port.postMessage(message)
 const sendPhys = message => port.postMessage({ id: "to_phys", message })
 
 const imports = {
-  millis: () => BigInt(Date.now())
+  millis: () => BigInt(Date.now()),
+  addRectangle: (x, y, w, h) => {
+    sendPhys({
+      id: "rectangle",
+      args: [x, y, w, h],
+    })
+  },
 }
 
 self.addEventListener("message", async function messageHandler(event) {
@@ -20,6 +26,8 @@ self.addEventListener("message", async function messageHandler(event) {
     api = new API({
       hostWrite: msg => sendMain({ id: "write", data: msg }),
     })
+
+    sendPhys("hello from cpp")
   }
 
   if (event.data.id === "run_code") {
