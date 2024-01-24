@@ -4,7 +4,8 @@ let api
 let port
 let imports = {
   millis: () => BigInt(Date.now()),
-  alert: () => port.postMessage({ id: "alert" })
+  alert: () => port.postMessage({ id: "alert" }),
+  random: () => Math.random()
 }
 let result = null
 
