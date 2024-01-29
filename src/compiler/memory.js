@@ -1,4 +1,4 @@
-import { readStr } from './shared'
+import { readStr } from "./shared.js"
 
 export class Memory {
   constructor(memory) {
@@ -47,10 +47,10 @@ export class Memory {
   write(o, buf) {
     if (buf instanceof ArrayBuffer) {
       return this.write(o, new Uint8Array(buf))
-    } else if (typeof buf === 'string') {
+    } else if (typeof buf === "string") {
       return this.write(
         o,
-        buf.split('').map((x) => x.charCodeAt(0))
+        buf.split("").map(x => x.charCodeAt(0))
       )
     } else {
       const dst = new Uint8Array(this.buffer, o, buf.length)

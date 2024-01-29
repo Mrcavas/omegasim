@@ -1,4 +1,4 @@
-import { assert, readStr } from './shared'
+import { assert, readStr } from "./shared.js"
 
 export class Tar {
   constructor(buffer) {
@@ -37,7 +37,7 @@ export class Tar {
       linkname: this.readStr(100),
     }
 
-    if (this.readStr(8) !== 'ustar  ') {
+    if (this.readStr(8) !== "ustar  ") {
       return null
     }
 
@@ -48,14 +48,14 @@ export class Tar {
     entry.filenamePrefix = this.readStr(155)
     this.alignUp()
 
-    if (entry.type === '0') {
+    if (entry.type === "0") {
       // Regular file.
       entry.contents = this.u8.subarray(this.offset, this.offset + entry.size)
       this.offset += entry.size
       this.alignUp()
-    } else if (entry.type !== '5') {
+    } else if (entry.type !== "5") {
       // Directory.
-      console.log('type', entry.type)
+      console.log("type", entry.type)
       assert(false)
     }
     return entry
@@ -65,10 +65,10 @@ export class Tar {
     let entry
     while ((entry = this.readEntry())) {
       switch (entry.type) {
-        case '0': // Regular file.
+        case "0": // Regular file.
           memfs.addFile(entry.filename, entry.contents)
           break
-        case '5':
+        case "5":
           memfs.addDirectory(entry.filename)
           break
       }

@@ -1,11 +1,11 @@
-import { AssertError } from './errors.js'
+import { AssertError } from "./errors.js"
 
 export function sleep(ms) {
   return new Promise((resolve, _) => setTimeout(resolve, ms))
 }
 
 export function readStr(u8, o, len = -1) {
-  let str = ''
+  let str = ""
   let end = u8.length
   if (len != -1) end = o + len
   for (let i = o; i < end && u8[i] != 0; ++i) str += String.fromCharCode(u8[i])
@@ -14,7 +14,7 @@ export function readStr(u8, o, len = -1) {
 
 export function assert(cond) {
   if (!cond) {
-    throw new AssertError('assertion failed.')
+    throw new AssertError("assertion failed.")
   }
 }
 
@@ -35,5 +35,3 @@ export function msToSec(start, end) {
 }
 
 export const ESUCCESS = 0
-
-export const RAF_PROC_EXIT_CODE = 0xc0c0a

@@ -1,7 +1,10 @@
-import { Engine, Runner, Bodies, Composite } from "matter-js"
-import { canvas, context } from "./worker.js"
+import { Bodies, Composite, Engine, Runner } from "matter-js"
+import { canvas, context, hostLog } from "./worker.js"
 
 export let engine
+export const events = new EventTarget()
+
+const addListener = (name, cb) => events.addEventListener(name, e => cb(...e.detail))
 
 export function initMatter() {
   engine = Engine.create()
@@ -11,40 +14,47 @@ export function initMatter() {
   //   engine: engine,
   // })
 
-    const boxA = Bodies.rectangle(400, 200, 80, 80)
+  const boxA = Bodies.rectangle(400, 200, 80, 80)
   const boxB = Bodies.rectangle(450, 50, 80, 80)
   const ground = Bodies.rectangle(400, 610, 9999, 60, { isStatic: true })
 
-  Composite.add(engine.world, [boxA, boxB, ground]);
+  Composite.add(engine.world, [boxA, boxB, ground])
 
   // Render.run(render)
 
-    (function render() {
-      var bodies = Composite.allBodies(engine.world);
+  addListener("setMotorLeft", power => {
+    hostLog(`setting left power in phys to ${power}`)
+  })
 
-      requestAnimationFrame(render);
+  addListener("setMotorRight", power => {
+    hostLog(`setting right power in phys to ${power}`)
+  })
+  ;(function render() {
+    var bodies = Composite.allBodies(engine.world)
 
-      context.fillStyle = '#000';
-      context.fillRect(0, 0, canvas.width, canvas.height);
+    requestAnimationFrame(render)
 
-      context.beginPath();
+    context.fillStyle = "#000"
+    context.fillRect(0, 0, canvas.width, canvas.height)
 
-      for (var i = 0; i < bodies.length; i += 1) {
-        var vertices = bodies[i].vertices;
+    context.beginPath()
 
-        context.moveTo(vertices[0].x, vertices[0].y);
+    for (var i = 0; i < bodies.length; i += 1) {
+      var vertices = bodies[i].vertices
 
-        for (var j = 1; j < vertices.length; j += 1) {
-          context.lineTo(vertices[j].x, vertices[j].y);
-        }
+      context.moveTo(vertices[0].x, vertices[0].y)
 
-        context.lineTo(vertices[0].x, vertices[0].y);
+      for (var j = 1; j < vertices.length; j += 1) {
+        context.lineTo(vertices[j].x, vertices[j].y)
       }
 
-      context.lineWidth = 1;
-      context.strokeStyle = '#fff';
-      context.stroke();
-    })();
+      context.lineTo(vertices[0].x, vertices[0].y)
+    }
+
+    context.lineWidth = 1
+    context.strokeStyle = "#fff"
+    context.stroke()
+  })()
 
   const runner = Runner.create()
 

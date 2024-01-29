@@ -1,22 +1,22 @@
-import { AbortError } from './errors.js'
-import { Memory } from './memory'
-import { assert, ESUCCESS, getImportObject } from './shared'
-import memfsUrl from '../../compiler/assets/memfs.wasm?url'
+import { AbortError } from "./errors.js"
+import { Memory } from "./memory.js"
+import { assert, ESUCCESS, getImportObject } from "./shared.js"
+import memfsUrl from "./assets/memfs.wasm?url"
 
 export class MemFS {
   constructor(options) {
     this.hostWrite = options.hostWrite
-    this.stdinStr = options.stdinStr || ''
+    this.stdinStr = options.stdinStr || ""
     this.stdinStrPos = 0
 
     this.hostMem_ = null // Set later when wired up to application.
 
     // Imports for memfs module.
-    const env = getImportObject(this, ['abort', 'host_write', 'host_read', 'memfs_log', 'copy_in', 'copy_out'])
+    const env = getImportObject(this, ["abort", "host_write", "host_read", "memfs_log", "copy_in", "copy_out"])
 
     this.ready = fetch(memfsUrl)
-      .then((result) => result.arrayBuffer())
-      .then(async (buffer) => {
+      .then(result => result.arrayBuffer())
+      .then(async buffer => {
         // memfs
         const module = await WebAssembly.compile(buffer)
         const instance = await WebAssembly.instantiate(module, { env })
@@ -68,7 +68,7 @@ export class MemFS {
     this.hostMem_.check()
     assert(fd <= 2)
     let size = 0
-    let str = ''
+    let str = ""
     for (let i = 0; i < iovs_len; ++i) {
       const buf = this.hostMem_.read32(iovs)
       iovs += 4

@@ -1,6 +1,6 @@
 import { NotImplemented, ProcExit } from "./errors.js"
-import { Memory } from "./memory"
-import { ESUCCESS, getImportObject, RAF_PROC_EXIT_CODE } from "./shared"
+import { Memory } from "./memory.js"
+import { ESUCCESS, getImportObject } from "./shared.js"
 
 export class App {
   constructor(module, memfs, name, ...args) {
@@ -27,7 +27,7 @@ export class App {
     // Fill in some WASI implementations from memfs.
     Object.assign(wasi_unstable, this.memfs.exports)
 
-    this.ready = WebAssembly.instantiate(module, { wasi_unstable, env }).then((instance) => {
+    this.ready = WebAssembly.instantiate(module, { wasi_unstable, env }).then(instance => {
       this.exports = instance.exports
       this.mem = new Memory(this.exports.memory)
       this.memfs.hostMem = this.mem
@@ -37,34 +37,21 @@ export class App {
   async run() {
     await this.ready
     try {
+      if (this.exports.initOmega) this.exports.initOmega()
       this.exports._start()
     } catch (exn) {
-      let writeStack = true
       if (exn instanceof ProcExit) {
-        if (exn.code === RAF_PROC_EXIT_CODE) {
-          console.log("Allowing rAF after exit.")
-          return true
-        }
-        // Don't allow rAF unless you return the right code.
-        console.log(`Disallowing rAF since exit code is ${exn.code}.`)
         this.allowRequestAnimationFrame = false
-        if (exn.code === 0) {
-          return false
-        }
-        writeStack = false
+        console.log("exiting")
+        return exn.code
       }
 
-      // Write error message.
-      let msg = `\x1b[91mError: ${exn.message}`
-      if (writeStack) {
-        msg = msg + `\n${exn.stack}`
-      }
-      msg += "\x1b[0m\n"
+      let msg = `\x1b[91mError: ${exn.message}\n${exn.stack}\x1b[0m\n`
       this.memfs.hostWrite(msg)
 
-      // Propagate error.
       throw exn
     }
+    return 0
   }
 
   proc_exit(code) {

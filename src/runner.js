@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import CppWorker from "./compiler/cpp/worker?worker"
+import CppWorker from "./compiler/worker.js?worker"
 import PhysWorker from "./physics/worker?worker"
 
 const defaultCode = `#include <stdio.h>
@@ -31,13 +31,13 @@ export const useRunner = create(
       cpp: null,
       phys: null,
       onWrite: console.log,
-      setOnWrite: (onWrite) => set({ ...get(), onWrite }),
+      setOnWrite: onWrite => set({ ...get(), onWrite }),
       clearLogs: null,
-      setClearLogs: (clearLogs) => set({ ...get(), clearLogs }),
+      setClearLogs: clearLogs => set({ ...get(), clearLogs }),
       code: defaultCode,
-      setCode: (code) => set({ ...get(), code }),
-      init(canvas, initResizeHandler) {
-        set((state) => {
+      setCode: code => set({ ...get(), code }),
+      init(canvas) {
+        set(state => {
           const cpp = new CppWorker()
           const cppChannel = new MessageChannel()
 
@@ -48,11 +48,14 @@ export const useRunner = create(
 
           const offscreenCanvas = canvas.transferControlToOffscreen()
 
-          phys.postMessage({
-            id: "constructor",
-            data: physChannel.port2,
-            canvas: offscreenCanvas,
-          }, [physChannel.port2, offscreenCanvas])
+          phys.postMessage(
+            {
+              id: "constructor",
+              data: physChannel.port2,
+              canvas: offscreenCanvas,
+            },
+            [physChannel.port2, offscreenCanvas]
+          )
 
           const messageHandler = event => {
             if (event.data.id === "to_phys") {
@@ -89,6 +92,6 @@ export const useRunner = create(
         cpp.port.postMessage({ id: "run_code", data: code })
       },
     }),
-    { name: "runner-store", version: 3, blacklist: ["cpp", "phys"] },
-  ),
+    { name: "runner-store", version: 3, blacklist: ["cpp", "phys"] }
+  )
 )
