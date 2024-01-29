@@ -24,19 +24,15 @@ int main() {
 
 const messageHandler = get => event => {
   if (!get()) return
-  const { cpp, phys, onWrite } = get()
+  const { cpp, phys, onWrite, onStatus } = get()
 
-  if (event.data.id === "to_phys") {
-    phys.port.postMessage(event.data.message)
-  }
+  if (event.data.id === "to_phys") phys.port.postMessage(event.data.message)
 
-  if (event.data.id === "to_cpp") {
-    cpp.port.postMessage(event.data.message)
-  }
+  if (event.data.id === "to_cpp") cpp.port.postMessage(event.data.message)
 
-  if (event.data.id === "write") {
-    onWrite(event.data.data)
-  }
+  if (event.data.id === "write") onWrite(event.data.data)
+
+  if (event.data.id === "status") onStatus(event.data.data)
 }
 
 export const useRunner = create(
@@ -44,8 +40,10 @@ export const useRunner = create(
     (set, get) => ({
       cpp: null,
       phys: null,
-      onWrite: console.log,
+      onWrite: null,
       setOnWrite: onWrite => set({ ...get(), onWrite }),
+      onStatus: null,
+      setOnStatus: onStatus => set({ ...get(), onStatus }),
       clearLogs: null,
       setClearLogs: clearLogs => set({ ...get(), clearLogs }),
       code: defaultCode,
@@ -53,7 +51,6 @@ export const useRunner = create(
       sharedBuffer: null,
       initPhys(canvas) {
         set(state => {
-          // if (window.physInit) return
           const phys = new PhysWorker()
           const physChannel = new MessageChannel()
 
@@ -69,8 +66,6 @@ export const useRunner = create(
             [physChannel.port2, offscreenCanvas]
           )
           physChannel.port1.onmessage = messageHandler(get)
-
-          // window.physInit = true
 
           return {
             ...state,
@@ -93,6 +88,7 @@ export const useRunner = create(
         })
       },
       init(canvas) {
+        // eslint-disable-next-line no-undef
         console.log("can use shared memory:", crossOriginIsolated)
         const { initPhys, initCpp } = get()
 
@@ -105,7 +101,8 @@ export const useRunner = create(
         initCpp()
       },
       restart() {
-        const { cpp, initCpp } = get()
+        const { cpp, initCpp, onStatus } = get()
+        onStatus("init")
         cpp.worker.terminate()
         cpp.port.close()
         initCpp()

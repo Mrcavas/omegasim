@@ -20,24 +20,21 @@ export class API {
     })
 
     this.ready = this.memfs.ready
-      .then(() => {
-        return this.untar(this.memfs, sysrootUrl)
-      })
-      .then(() => {
+      .then(() => this.untar(this.memfs, sysrootUrl))
+      .then(() =>
         fetch(OmegaHUrl).then(data =>
           data.arrayBuffer().then(buf => this.memfs.addFile("include/Omega.h", new Uint8Array(buf)))
         )
+      )
+      .then(() =>
         fetch(OmegaCUrl).then(data =>
           data.arrayBuffer().then(buf => this.memfs.addFile("Omega.cc", new Uint8Array(buf)))
         )
-      })
-      .then(() => {
-        this.getModule(clangUrl).then(() => {
-          this.getModule(lldUrl).then(() => {
-            this.compile({ input: "Omega.cc", obj: "Omega.o" })
-          })
-        })
-      })
+      )
+      .then(() => this.getModule(clangUrl))
+      .then(() => this.getModule(lldUrl))
+      .then(() => this.compile({ input: "Omega.cc", obj: "Omega.o" }))
+      .then(options.onReady)
   }
 
   async getModule(name) {
@@ -88,7 +85,6 @@ export class API {
     const contents = options.contents
     const obj = options.obj
 
-    await this.ready
     if (contents !== undefined) this.memfs.addFile(input, contents)
     const clang = await this.getModule(clangUrl)
     await this.run(

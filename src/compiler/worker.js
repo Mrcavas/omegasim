@@ -34,9 +34,7 @@ const imports = {
   },
   delay(ms) {
     const start = Date.now()
-    while (Date.now() - start < ms) {
-      /* wait */
-    }
+    while (Date.now() - start < ms) eval("") // try to trick vite to not optimize this
   },
   setMotorLeft: callPhysCb("setMotorLeft"),
   setMotorRight: callPhysCb("setMotorLeft"),
@@ -53,12 +51,17 @@ self.addEventListener("message", async function messageHandler(event) {
     port = event.data.data
     port.onmessage = messageHandler
 
-    api = new API({ hostWrite })
+    api = new API({
+      hostWrite,
+      onReady: () => sendMain({ id: "status", data: "ready" }),
+    })
     buffer = event.data.buffer
     dataView = new DataView(buffer)
   }
 
   if (event.data.id === "run_code") {
+    sendMain({ id: "status", data: "running" })
     await api.compileLinkRun(event.data.data, imports)
+    sendMain({ id: "status", data: "ready" })
   }
 })
