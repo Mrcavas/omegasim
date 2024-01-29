@@ -37,12 +37,13 @@ export class App {
   async run() {
     await this.ready
     try {
-      if (this.exports.loopC) {
-        this.exports._start()
-        setInterval(() => {
-          this.exports.loopC()
-        })
-      }
+      // if (this.exports.loopC) {
+      //   this.exports._start()
+      //   setInterval(() => {
+      //     this.exports.loopC()
+      //   })
+      // }
+      if (this.exports.initOmega) this.exports.initOmega()
       this.exports._start()
     } catch (exn) {
       if (exn instanceof ProcExit) {

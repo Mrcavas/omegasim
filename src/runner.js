@@ -3,14 +3,25 @@ import { persist } from "zustand/middleware"
 import CppWorker from "./compiler/worker.js?worker"
 import PhysWorker from "./physics/worker?worker"
 
+// const defaultCode = `#include <Omega.h>
+//
+// void loop() {
+//     printf("diff: %lld\\n", millis() - getUSDistance(1));
+// }
+//
+// void setup() {
+//     printf("setup\\n");
+// }`\
+
 const defaultCode = `#include <Omega.h>
 
-void loop() {
-    printf("diff: %lld\\n", millis() - getUSDistance(1));
-}
+int main() {
+    while (true) {
+        printf("diff: %lld\\n", millis() - getUSDistance(1));
+        delay(50);
+    }
 
-void setup() {
-    printf("setup\\n");
+    return 0;
 }`
 
 const messageHandler = get => event => {
@@ -97,6 +108,6 @@ export const useRunner = create(
         cpp.port.postMessage({ id: "run_code", data: code })
       },
     }),
-    { name: "runner-store", version: 6, blacklist: ["cpp", "phys"] }
+    { name: "runner-store", version: 7, blacklist: ["cpp", "phys"] }
   )
 )

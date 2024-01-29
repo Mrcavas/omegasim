@@ -3,9 +3,9 @@
 
 #include <stdio.h>
 
-void loop();
-void setup();
-int main();
+// void loop();
+// void setup();
+// int main();
 
 extern "C" uint64_t millis();
 extern "C" void delay(uint64_t time);
