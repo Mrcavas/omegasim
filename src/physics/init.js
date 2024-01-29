@@ -1,9 +1,4 @@
-self.window = {
-  requestAnimationFrame: self.requestAnimationFrame,
-  cancelAnimationFrame: self.cancelAnimationFrame,
-}
-
-const { Body, Bodies, Composite, Engine, Render, Runner } = await import("matter-js")
+import { Body, Bodies, Composite, Engine, Runner } from "matter-js"
 import { canvas, context, hostLog } from "./worker.js"
 
 export let engine
@@ -16,16 +11,9 @@ export function initMatter() {
   engine = Engine.create()
   engine.gravity.y = 0
 
-  // const render = Render.create({
-  //   canvas: canvas,
-  //   engine: engine,
-  // })
-
   car = Bodies.circle(0, 0, 20)
 
   Composite.add(engine.world, [car])
-
-  // Render.run(render)
 
   addListener("setMotorLeft", power => {
     hostLog(`setting left power in phys to ${power}`)
