@@ -17,7 +17,7 @@ export default function App() {
 
   const containerRef = useRef()
   const canvasRef = useRef()
-  const [tab, setTab] = useState(1)
+  const [tab, setTab] = useState(0)
 
   useEffect(() => {
     init(canvasRef.current)
@@ -38,7 +38,10 @@ export default function App() {
       </SplitterPanel>
       <SplitterPanel className="flex flex-col gap-2 p-2 overflow-hidden" size={60}>
         <div className="relative flex flex-row gap-2 justify-between">
-          <Button icon="pi pi-caret-right" severity="success" rounded text onClick={runCode} />
+          <div>
+            <Button icon="pi pi-caret-right" severity="success" rounded text onClick={runCode} />
+            <Button icon="pi pi-refresh rotate-45" severity="help" rounded text onClick={restart} />
+          </div>
 
           <div className="absolute left-1/2 -translate-x-1/2">
             <Button
@@ -63,10 +66,7 @@ export default function App() {
           </div>
 
           {tab === 1 && (
-            <div>
-              <Button icon="pi pi-refresh rotate-45" severity="help" rounded text onClick={restart} />
-              <Button icon="pi pi-times" severity="danger" rounded text className="ml-2" onClick={clearLogs} />
-            </div>
+            <Button icon="pi pi-times" severity="danger" rounded text className="ml-2" onClick={clearLogs} />
           )}
         </div>
 

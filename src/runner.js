@@ -3,22 +3,20 @@ import { persist } from "zustand/middleware"
 import CppWorker from "./compiler/worker.js?worker"
 import PhysWorker from "./physics/worker?worker"
 
-// const defaultCode = `#include <Omega.h>
-//
-// void loop() {
-//     printf("diff: %lld\\n", millis() - getUSDistance(1));
-// }
-//
-// void setup() {
-//     printf("setup\\n");
-// }`\
-
 const defaultCode = `#include <Omega.h>
 
+float a = 0;
+
 int main() {
+    auto start = millis();
+
     while (true) {
-        printf("diff: %lld\\n", millis() - getUSDistance(1));
-        delay(50);
+        a = (millis() - start) * 0.001;
+        int16_t x = cos(a) * 200;
+        int16_t y = sin(2 * a) * 100;
+
+        setXY(x, y);
+        delay(1);
     }
 
     return 0;
@@ -52,9 +50,10 @@ export const useRunner = create(
       setClearLogs: clearLogs => set({ ...get(), clearLogs }),
       code: defaultCode,
       setCode: code => set({ ...get(), code }),
+      sharedBuffer: null,
       initPhys(canvas) {
         set(state => {
-          if (window.physInit) return
+          // if (window.physInit) return
           const phys = new PhysWorker()
           const physChannel = new MessageChannel()
 
@@ -65,12 +64,13 @@ export const useRunner = create(
               id: "constructor",
               data: physChannel.port2,
               canvas: offscreenCanvas,
+              buffer: state.sharedBuffer,
             },
             [physChannel.port2, offscreenCanvas]
           )
           physChannel.port1.onmessage = messageHandler(get)
 
-          window.physInit = true
+          // window.physInit = true
 
           return {
             ...state,
@@ -83,7 +83,7 @@ export const useRunner = create(
           const cpp = new CppWorker()
           const cppChannel = new MessageChannel()
 
-          cpp.postMessage({ id: "constructor", data: cppChannel.port2 }, [cppChannel.port2])
+          cpp.postMessage({ id: "constructor", data: cppChannel.port2, buffer: state.sharedBuffer }, [cppChannel.port2])
           cppChannel.port1.onmessage = messageHandler(get)
 
           return {
@@ -93,7 +93,14 @@ export const useRunner = create(
         })
       },
       init(canvas) {
+        console.log("can use shared memory:", crossOriginIsolated)
         const { initPhys, initCpp } = get()
+
+        set(state => ({
+          ...state,
+          sharedBuffer: new SharedArrayBuffer(23),
+        }))
+
         initPhys(canvas)
         initCpp()
       },
@@ -108,6 +115,6 @@ export const useRunner = create(
         cpp.port.postMessage({ id: "run_code", data: code })
       },
     }),
-    { name: "runner-store", version: 7, blacklist: ["cpp", "phys"] }
+    { name: "runner-store", version: 8, blacklist: ["cpp", "phys", "sharedBuffer"] }
   )
 )

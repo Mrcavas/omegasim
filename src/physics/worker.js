@@ -1,36 +1,26 @@
-import { engine, events, initMatter } from "./init.js"
-import { Bodies, Composite } from "matter-js"
+import { events, initMatter } from "./init.js"
 
 let port
+let currentOffset = 0
+let buffer, dataView
 export let canvas
 export let context
 
-const defaultState = {
-  us: {
-    1: 0,
-    2: 0,
-  },
-  line: {
-    1: 0,
-    2: 0,
-  },
-  btn: {
-    1: 0,
-    2: 0,
-    3: 0,
-  },
+export const sendMain = message => port.postMessage(message)
+export const hostLog = msg => sendMain({ id: "write", data: `\x1b[1;92m>\x1b[0m ${msg}\n` })
+const updateStateCb = (size, unsigned) => {
+  const offset = currentOffset
+  currentOffset += size
+  return value => dataView[`set${size === 8 ? "Big" : ""}${unsigned ? "Uint" : "Int"}${size * 8}`](offset, value)
 }
 
-export const sendMain = message => port.postMessage(message)
-export const sendCpp = message => port.postMessage({ id: "to_cpp", message })
-export const hostLog = msg => sendMain({ id: "write", data: `\x1b[1;92m>\x1b[0m ${msg}\n` })
-export const updateState = (statePath, value) =>
-  sendCpp({
-    id: "state_update",
-    data: {
-      [statePath]: value,
-    },
-  })
+export const updateUS1 = updateStateCb(2, true)
+export const updateUS2 = updateStateCb(2, true)
+export const updateLine1 = updateStateCb(2, true)
+export const updateLine2 = updateStateCb(2, true)
+export const updateBtn1 = updateStateCb(1)
+export const updateBtn2 = updateStateCb(1)
+export const updateBtn3 = updateStateCb(1)
 
 if (!self.isInitialized) {
   self.isInitialized = true
@@ -40,12 +30,11 @@ if (!self.isInitialized) {
       port.onmessage = messageHandler
 
       canvas = event.data.canvas
+      canvas.style = {}
       context = canvas.getContext("2d")
 
-      sendCpp({
-        id: "state_update",
-        data: defaultState,
-      })
+      buffer = event.data.buffer
+      dataView = new DataView(buffer)
 
       initMatter()
     }
@@ -53,10 +42,6 @@ if (!self.isInitialized) {
     if (event.data.id === "canvas_resize") {
       canvas.width = event.data.width
       canvas.height = event.data.height
-    }
-
-    if (event.data.id === "rectangle") {
-      Composite.add(engine.world, Bodies.rectangle(...event.data.args))
     }
 
     if (event.data.id === "call") {

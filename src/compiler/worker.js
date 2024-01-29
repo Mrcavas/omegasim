@@ -2,8 +2,8 @@ import { API } from "./api.js"
 
 let api
 let port
-
-let state = {}
+let buffer, dataView
+let currentOffset = 0
 
 const sendMain = message => port.postMessage(message)
 const sendPhys = message => port.postMessage({ id: "to_phys", message })
@@ -18,7 +18,15 @@ const callPhysCb =
       args,
     })
 
-const getStateCB = statePath => channel => state[statePath][channel] ?? 0
+const readStateCb = (size, unsigned) => {
+  const offset = currentOffset
+  currentOffset += size
+  return value => dataView[`get${size === 8 ? "Big" : ""}${unsigned ? "Uint" : "Int"}${size * 8}`](offset, value)
+}
+
+const readUS = [readStateCb(2, true), readStateCb(2, true)]
+const readLine = [readStateCb(2, true), readStateCb(2, true)]
+const readBtn = [readStateCb(1), readStateCb(1), readStateCb(1)]
 
 const imports = {
   millis() {
@@ -34,9 +42,10 @@ const imports = {
   setMotorRight: callPhysCb("setMotorLeft"),
   setLed: callPhysCb("setLed"),
   setServo: callPhysCb("setMotorLeft"),
-  getLineSensor: getStateCB("line"),
-  getUSDistance: getStateCB("us"),
-  readButton: getStateCB("btn"),
+  setXY: callPhysCb("setXY"),
+  getUSDistance: channel => readUS[channel - 1](),
+  getLineSensor: channel => readLine[channel - 1](),
+  readButton: channel => readBtn[channel - 1](),
 }
 
 self.addEventListener("message", async function messageHandler(event) {
@@ -45,19 +54,11 @@ self.addEventListener("message", async function messageHandler(event) {
     port.onmessage = messageHandler
 
     api = new API({ hostWrite })
-
-    console.log("can use shared memory:", crossOriginIsolated)
+    buffer = event.data.buffer
+    dataView = new DataView(buffer)
   }
 
   if (event.data.id === "run_code") {
-    api.compileLinkRun(event.data.data, imports)
-  }
-
-  if (event.data.id === "state_update") {
-    // console.log("state update")
-    state = {
-      ...state,
-      ...event.data.data,
-    }
+    await api.compileLinkRun(event.data.data, imports)
   }
 })
