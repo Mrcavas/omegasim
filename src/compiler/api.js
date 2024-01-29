@@ -166,7 +166,7 @@ export class API {
     const main = await WebAssembly.compile(buffer)
 
     main.imports = imports
-    const code = await this.run(main, wasm)
-    this.hostLog(`Exited with code ${code}\n`)
+    /*const code = */ await this.run(main, wasm)
+    // this.hostLog(`Exited with code ${code}\n`)
   }
 }

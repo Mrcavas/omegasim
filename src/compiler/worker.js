@@ -3,7 +3,7 @@ import { API } from "./api.js"
 let api
 let port
 
-let state
+let state = {}
 
 const sendMain = message => port.postMessage(message)
 const sendPhys = message => port.postMessage({ id: "to_phys", message })
@@ -18,9 +18,11 @@ const callPhysCb =
       args,
     })
 
+const getStateCB = statePath => channel => state[statePath][channel] ?? 0
+
 const imports = {
   millis() {
-    BigInt(Date.now())
+    return BigInt(Date.now())
   },
   delay(ms) {
     const start = Date.now()
@@ -32,6 +34,9 @@ const imports = {
   setMotorRight: callPhysCb("setMotorLeft"),
   setLed: callPhysCb("setLed"),
   setServo: callPhysCb("setMotorLeft"),
+  getLineSensor: getStateCB("line"),
+  getUSDistance: getStateCB("us"),
+  readButton: getStateCB("btn"),
 }
 
 self.addEventListener("message", async function messageHandler(event) {
@@ -41,14 +46,15 @@ self.addEventListener("message", async function messageHandler(event) {
 
     api = new API({ hostWrite })
 
-    sendPhys("hello from cpp")
+    console.log("can use shared memory:", crossOriginIsolated)
   }
 
   if (event.data.id === "run_code") {
-    await api.compileLinkRun(event.data.data, imports)
+    api.compileLinkRun(event.data.data, imports)
   }
 
   if (event.data.id === "state_update") {
+    // console.log("state update")
     state = {
       ...state,
       ...event.data.data,

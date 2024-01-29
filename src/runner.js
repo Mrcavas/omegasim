@@ -3,27 +3,32 @@ import { persist } from "zustand/middleware"
 import CppWorker from "./compiler/worker.js?worker"
 import PhysWorker from "./physics/worker?worker"
 
-const defaultCode = `#include <stdio.h>
+const defaultCode = `#include <Omega.h>
 
-extern "C" void addRectangle(int x, int y, int w, int h);
+void loop() {
+    printf("diff: %lld\\n", millis() - getUSDistance(1));
+}
 
-extern "C" uint64_t millis();
-
-int main() {
-    uint64_t start = millis();
-
-    while (true) {
-        while (millis() - start < 1000) printf("");
-
-        addRectangle(
-            400, 200, 80, 80
-        );
-
-        start = millis();
-    }
-
-    return 0;
+void setup() {
+    printf("setup\\n");
 }`
+
+const messageHandler = get => event => {
+  if (!get()) return
+  const { cpp, phys, onWrite } = get()
+
+  if (event.data.id === "to_phys") {
+    phys.port.postMessage(event.data.message)
+  }
+
+  if (event.data.id === "to_cpp") {
+    cpp.port.postMessage(event.data.message)
+  }
+
+  if (event.data.id === "write") {
+    onWrite(event.data.data)
+  }
+}
 
 export const useRunner = create(
   persist(
@@ -36,15 +41,11 @@ export const useRunner = create(
       setClearLogs: clearLogs => set({ ...get(), clearLogs }),
       code: defaultCode,
       setCode: code => set({ ...get(), code }),
-      init(canvas) {
+      initPhys(canvas) {
         set(state => {
-          const cpp = new CppWorker()
-          const cppChannel = new MessageChannel()
-
+          if (window.physInit) return
           const phys = new PhysWorker()
           const physChannel = new MessageChannel()
-
-          cpp.postMessage({ id: "constructor", data: cppChannel.port2 }, [cppChannel.port2])
 
           const offscreenCanvas = canvas.transferControlToOffscreen()
 
@@ -56,42 +57,46 @@ export const useRunner = create(
             },
             [physChannel.port2, offscreenCanvas]
           )
+          physChannel.port1.onmessage = messageHandler(get)
 
-          const messageHandler = event => {
-            if (event.data.id === "to_phys") {
-              physChannel.port1.postMessage(event.data.message)
-            }
-
-            if (event.data.id === "to_cpp") {
-              cppChannel.port1.postMessage(event.data.message)
-            }
-
-            if (event.data.id === "write") {
-              const { onWrite } = get()
-              onWrite(event.data.data)
-            }
-          }
-
-          cppChannel.port1.onmessage = messageHandler
-          physChannel.port1.onmessage = messageHandler
+          window.physInit = true
 
           return {
             ...state,
-            cpp: { port: cppChannel.port1, worker: cpp },
             phys: { port: physChannel.port1, worker: phys },
           }
         })
       },
+      initCpp() {
+        set(state => {
+          const cpp = new CppWorker()
+          const cppChannel = new MessageChannel()
+
+          cpp.postMessage({ id: "constructor", data: cppChannel.port2 }, [cppChannel.port2])
+          cppChannel.port1.onmessage = messageHandler(get)
+
+          return {
+            ...state,
+            cpp: { port: cppChannel.port1, worker: cpp },
+          }
+        })
+      },
+      init(canvas) {
+        const { initPhys, initCpp } = get()
+        initPhys(canvas)
+        initCpp()
+      },
       restart() {
-        const { cpp, init } = get()
+        const { cpp, initCpp } = get()
         cpp.worker.terminate()
-        init()
+        cpp.port.close()
+        initCpp()
       },
       runCode() {
         const { code, cpp } = get()
         cpp.port.postMessage({ id: "run_code", data: code })
       },
     }),
-    { name: "runner-store", version: 3, blacklist: ["cpp", "phys"] }
+    { name: "runner-store", version: 6, blacklist: ["cpp", "phys"] }
   )
 )

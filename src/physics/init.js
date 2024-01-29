@@ -1,5 +1,5 @@
 import { Bodies, Composite, Engine, Runner } from "matter-js"
-import { canvas, context, hostLog } from "./worker.js"
+import { canvas, context, hostLog, updateState } from "./worker.js"
 
 export let engine
 export const events = new EventTarget()
@@ -29,7 +29,17 @@ export function initMatter() {
   addListener("setMotorRight", power => {
     hostLog(`setting right power in phys to ${power}`)
   })
+
+  let tick = 0
+
   ;(function render() {
+    tick++
+
+    updateState("us", {
+      1: BigInt(Date.now()),
+      2: Math.random() * 100,
+    })
+
     var bodies = Composite.allBodies(engine.world)
 
     requestAnimationFrame(render)

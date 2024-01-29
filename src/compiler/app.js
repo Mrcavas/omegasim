@@ -37,12 +37,16 @@ export class App {
   async run() {
     await this.ready
     try {
-      if (this.exports.initOmega) this.exports.initOmega()
+      if (this.exports.loopC) {
+        this.exports._start()
+        setInterval(() => {
+          this.exports.loopC()
+        })
+      }
       this.exports._start()
     } catch (exn) {
       if (exn instanceof ProcExit) {
         this.allowRequestAnimationFrame = false
-        console.log("exiting")
         return exn.code
       }
 

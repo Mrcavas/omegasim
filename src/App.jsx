@@ -62,10 +62,12 @@ export default function App() {
             />
           </div>
 
-          <div>
-            <Button icon="pi pi-refresh rotate-45" severity="help" rounded text onClick={restart} />
-            <Button icon="pi pi-times" severity="danger" rounded text className="ml-2" onClick={clearLogs} />
-          </div>
+          {tab === 1 && (
+            <div>
+              <Button icon="pi pi-refresh rotate-45" severity="help" rounded text onClick={restart} />
+              <Button icon="pi pi-times" severity="danger" rounded text className="ml-2" onClick={clearLogs} />
+            </div>
+          )}
         </div>
 
         <div ref={containerRef} className={"h-full w-full rounded-md overflow-hidden " + (tab === 0 ? "" : "hidden")}>

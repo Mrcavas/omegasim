@@ -5,9 +5,32 @@ let port
 export let canvas
 export let context
 
+const defaultState = {
+  us: {
+    1: 0,
+    2: 0,
+  },
+  line: {
+    1: 0,
+    2: 0,
+  },
+  btn: {
+    1: 0,
+    2: 0,
+    3: 0,
+  },
+}
+
 export const sendMain = message => port.postMessage(message)
 export const sendCpp = message => port.postMessage({ id: "to_cpp", message })
 export const hostLog = msg => sendMain({ id: "write", data: `\x1b[1;92m>\x1b[0m ${msg}\n` })
+export const updateState = (statePath, value) =>
+  sendCpp({
+    id: "state_update",
+    data: {
+      [statePath]: value,
+    },
+  })
 
 if (!self.isInitialized) {
   self.isInitialized = true
@@ -18,6 +41,11 @@ if (!self.isInitialized) {
 
       canvas = event.data.canvas
       context = canvas.getContext("2d")
+
+      sendCpp({
+        id: "state_update",
+        data: defaultState,
+      })
 
       initMatter()
     }
