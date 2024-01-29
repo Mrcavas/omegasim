@@ -3,12 +3,6 @@ import { MemFS } from "./memfs.js"
 import { msToSec } from "./shared.js"
 import { Tar } from "./tar.js"
 
-import clangUrl from "./assets/clang.wasm?url"
-import lldUrl from "./assets/lld.wasm?url"
-import sysrootUrl from "./assets/sysroot.tar?url"
-import OmegaHUrl from "./assets/Omega.h?url"
-import OmegaCUrl from "./assets/Omega.c?url"
-
 export class API {
   constructor(options) {
     this.moduleCache = {}
@@ -20,19 +14,19 @@ export class API {
     })
 
     this.ready = this.memfs.ready
-      .then(() => this.untar(this.memfs, sysrootUrl))
+      .then(() => this.untar(this.memfs, "/sysroot.tar"))
       .then(() =>
-        fetch(OmegaHUrl).then(data =>
+        fetch("/Omega.h").then(data =>
           data.arrayBuffer().then(buf => this.memfs.addFile("include/Omega.h", new Uint8Array(buf)))
         )
       )
       .then(() =>
-        fetch(OmegaCUrl).then(data =>
+        fetch("/Omega.c").then(data =>
           data.arrayBuffer().then(buf => this.memfs.addFile("Omega.cc", new Uint8Array(buf)))
         )
       )
-      .then(() => this.getModule(clangUrl))
-      .then(() => this.getModule(lldUrl))
+      .then(() => this.getModule("/clang.wasm"))
+      .then(() => this.getModule("/lld.wasm"))
       .then(() => this.compile({ input: "Omega.cc", obj: "Omega.o" }))
       .then(options.onReady)
   }
@@ -86,7 +80,7 @@ export class API {
     const obj = options.obj
 
     if (contents !== undefined) this.memfs.addFile(input, contents)
-    const clang = await this.getModule(clangUrl)
+    const clang = await this.getModule("/clang.wasm")
     await this.run(
       clang,
       "clang",
@@ -123,7 +117,7 @@ export class API {
     const crt1 = `${libdir}/crt1.o`
 
     await this.ready
-    const lld = await this.getModule(lldUrl)
+    const lld = await this.getModule("/lld.wasm")
     return await this.run(
       lld,
       "wasm-ld",

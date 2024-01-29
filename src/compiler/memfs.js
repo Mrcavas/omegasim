@@ -1,7 +1,6 @@
 import { AbortError } from "./errors.js"
 import { Memory } from "./memory.js"
 import { assert, ESUCCESS, getImportObject } from "./shared.js"
-import memfsUrl from "./assets/memfs.wasm?url"
 
 export class MemFS {
   constructor(options) {
@@ -14,7 +13,7 @@ export class MemFS {
     // Imports for memfs module.
     const env = getImportObject(this, ["abort", "host_write", "host_read", "memfs_log", "copy_in", "copy_out"])
 
-    this.ready = fetch(memfsUrl)
+    this.ready = fetch("/memfs.wasm")
       .then(result => result.arrayBuffer())
       .then(async buffer => {
         // memfs
