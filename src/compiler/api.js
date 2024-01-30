@@ -5,8 +5,10 @@ import { Tar } from "./tar.js"
 
 export class API {
   constructor(options) {
-    this.moduleCache = {}
+    this.moduleCache = options.moduleCache ?? {}
+    console.log(this.moduleCache)
     this.hostWrite = options.hostWrite
+    this.hostCache = options.hostCache
     this.showTiming = options.showTiming || false
 
     this.memfs = new MemFS({
@@ -33,14 +35,15 @@ export class API {
 
   async getModule(name) {
     if (this.moduleCache[name]) return this.moduleCache[name]
+
     const module = await this.hostLogAsync(
       `Fetching and compiling ${name}`,
-      (async () => {
-        const response = await fetch(name)
-        return WebAssembly.compile(await response.arrayBuffer())
-      })()
+      WebAssembly.compileStreaming(fetch(name, { cache: "force-cache" }))
     )
+
     this.moduleCache[name] = module
+    this.hostCache(name, module)
+
     return module
   }
 
@@ -68,7 +71,7 @@ export class API {
   async untar(memfs, url) {
     await this.memfs.ready
     const promise = (async () => {
-      const tar = new Tar(await fetch(url).then(result => result.arrayBuffer()))
+      const tar = new Tar(await fetch(url, { cache: "force-cache" }).then(result => result.arrayBuffer()))
       tar.untar(this.memfs)
     })()
     await this.hostLogAsync(`Untarring ${url}`, promise)
@@ -81,33 +84,36 @@ export class API {
 
     if (contents !== undefined) this.memfs.addFile(input, contents)
     const clang = await this.getModule("/clang.wasm")
-    await this.run(
-      clang,
-      "clang",
-      "-cc1",
-      "-emit-obj",
-      "-disable-free",
-      "-isysroot",
-      "/",
-      "-internal-isystem",
-      "/include/c++/v1",
-      "-internal-isystem",
-      "/include",
-      "-internal-isystem",
-      "/lib/clang/8.0.1/include",
-      "-ferror-limit",
-      "19",
-      "-fmessage-length",
-      "80",
-      "-fcolor-diagnostics",
-      "-O2",
-      "-o",
-      obj,
-      "-x",
-      "c++",
-      input
+
+    await this.hostLogAsync(
+      `Compiling ${input}`,
+      this.run(
+        clang,
+        "clang",
+        "-cc1",
+        "-emit-obj",
+        "-disable-free",
+        "-isysroot",
+        "/",
+        "-internal-isystem",
+        "/include/c++/v1",
+        "-internal-isystem",
+        "/include",
+        "-internal-isystem",
+        "/lib/clang/8.0.1/include",
+        "-ferror-limit",
+        "19",
+        "-fmessage-length",
+        "80",
+        "-fcolor-diagnostics",
+        "-O2",
+        "-o",
+        obj,
+        "-x",
+        "c++",
+        input
+      )
     )
-    this.hostLog(`Compiled ${input}\n`)
   }
 
   async link(obj, wasm) {

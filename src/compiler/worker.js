@@ -48,13 +48,17 @@ const imports = {
 
 self.addEventListener("message", async function messageHandler(event) {
   if (event.data.id === "constructor") {
+    console.log("cpp init")
     port = event.data.data
     port.onmessage = messageHandler
 
     api = new API({
-      hostWrite,
       onReady: () => sendMain({ id: "status", data: "ready" }),
+      hostWrite,
+      moduleCache: event.data.cache,
+      hostCache: (name, module) => sendMain({ id: "cache", name, data: module }),
     })
+
     buffer = event.data.buffer
     dataView = new DataView(buffer)
   }

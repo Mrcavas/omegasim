@@ -22,7 +22,7 @@ int main() {
     return 0;
 }`
 
-const messageHandler = get => event => {
+const messageHandler = (set, get) => event => {
   if (!get()) return
   const { cpp, phys, onWrite, onStatus } = get()
 
@@ -33,6 +33,15 @@ const messageHandler = get => event => {
   if (event.data.id === "write") onWrite(event.data.data)
 
   if (event.data.id === "status") onStatus(event.data.data)
+
+  if (event.data.id === "cache")
+    set(state => ({
+      ...state,
+      moduleCache: {
+        ...state.moduleCache,
+        [event.data.name]: event.data.data,
+      },
+    }))
 }
 
 export const useRunner = create(
@@ -49,6 +58,7 @@ export const useRunner = create(
       code: defaultCode,
       setCode: code => set({ ...get(), code }),
       sharedBuffer: null,
+      moduleCache: {},
       initPhys(canvas) {
         set(state => {
           const phys = new PhysWorker()
@@ -65,7 +75,7 @@ export const useRunner = create(
             },
             [physChannel.port2, offscreenCanvas]
           )
-          physChannel.port1.onmessage = messageHandler(get)
+          physChannel.port1.onmessage = messageHandler(set, get)
 
           return {
             ...state,
@@ -78,8 +88,11 @@ export const useRunner = create(
           const cpp = new CppWorker()
           const cppChannel = new MessageChannel()
 
-          cpp.postMessage({ id: "constructor", data: cppChannel.port2, buffer: state.sharedBuffer }, [cppChannel.port2])
-          cppChannel.port1.onmessage = messageHandler(get)
+          cpp.postMessage(
+            { id: "constructor", data: cppChannel.port2, buffer: state.sharedBuffer, cache: state.moduleCache },
+            [cppChannel.port2]
+          )
+          cppChannel.port1.onmessage = messageHandler(set, get)
 
           return {
             ...state,
@@ -103,15 +116,21 @@ export const useRunner = create(
       restart() {
         const { cpp, initCpp, onStatus } = get()
         onStatus("init")
+        console.log("terminate cpp")
         cpp.worker.terminate()
         cpp.port.close()
         initCpp()
+        console.log("init cpp done")
       },
       runCode() {
         const { code, cpp } = get()
         cpp.port.postMessage({ id: "run_code", data: code })
       },
     }),
-    { name: "runner-store", version: 8, blacklist: ["cpp", "phys", "sharedBuffer"] }
+    {
+      name: "runner-store",
+      version: 8,
+      partialize: state => ({ code: state.code }),
+    }
   )
 )

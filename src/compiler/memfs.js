@@ -13,16 +13,14 @@ export class MemFS {
     // Imports for memfs module.
     const env = getImportObject(this, ["abort", "host_write", "host_read", "memfs_log", "copy_in", "copy_out"])
 
-    this.ready = fetch("/memfs.wasm")
-      .then(result => result.arrayBuffer())
-      .then(async buffer => {
+    this.ready = WebAssembly.instantiateStreaming(fetch("/memfs.wasm", { cache: "force-cache" }), { env }).then(
+      ({ instance }) => {
         // memfs
-        const module = await WebAssembly.compile(buffer)
-        const instance = await WebAssembly.instantiate(module, { env })
         this.exports = instance.exports
         this.mem = new Memory(this.exports.memory)
         this.exports.init()
-      })
+      }
+    )
   }
 
   set hostMem(mem) {
