@@ -48,7 +48,6 @@ const imports = {
 
 self.addEventListener("message", async function messageHandler(event) {
   if (event.data.id === "constructor") {
-    console.log("cpp init")
     port = event.data.data
     port.onmessage = messageHandler
 

@@ -3,21 +3,10 @@
 
 extern "C" void initOmega() {
     setbuf(stdout, NULL);
-    printf("initializing Omega\n");
+    printf("\x1b[96mInitializing Omega \x1b[1mv. a1\x1b[0m\n");
 }
-
-// extern "C" void loopC() {
-//         loop();
-// }
 
 void setMotors(int8_t leftPower, int8_t rightPower) {
   setMotorLeft(leftPower);
   setMotorRight(rightPower);
 }
-
-// int main() {
-//     setbuf(stdout, NULL);
-//     printf("initializing Omega\n");
-//     setup();
-//     return 0;
-// }

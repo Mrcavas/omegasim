@@ -15,10 +15,6 @@ export default function Logs({ className }) {
     })
   }, [])
 
-  // useEffect(() => {
-  //   console.log(text)
-  // }, [text])
-
   return (
     <div className={"h-full overflow-auto " + (className ?? "")}>
       <div

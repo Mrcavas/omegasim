@@ -6,7 +6,6 @@ import { Tar } from "./tar.js"
 export class API {
   constructor(options) {
     this.moduleCache = options.moduleCache ?? {}
-    console.log(this.moduleCache)
     this.hostWrite = options.hostWrite
     this.hostCache = options.hostCache
     this.showTiming = options.showTiming || false

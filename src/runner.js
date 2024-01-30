@@ -116,11 +116,9 @@ export const useRunner = create(
       restart() {
         const { cpp, initCpp, onStatus } = get()
         onStatus("init")
-        console.log("terminate cpp")
         cpp.worker.terminate()
         cpp.port.close()
         initCpp()
-        console.log("init cpp done")
       },
       runCode() {
         const { code, cpp } = get()
