@@ -48,7 +48,6 @@ const carVertices = [
 ]
 
 export function initMatter() {
-  hostLog("Initializing Physics Engine (powered by Matter.js)")
   engine = Engine.create({
     gravity: {
       y: 0,

@@ -6,7 +6,15 @@ import PhysWorker from "./physics/worker?worker"
 const defaultCode = `#include <Omega.h>
 
 int main() {
-    
+    auto start = millis();
+
+    while (true) {
+        auto dt = (millis() - start) * 0.001;
+
+        setMotors(sin(dt) * 100, cos(dt) * 100);
+
+        delay(1);
+    }
 
     return 0;
 }`
@@ -97,20 +105,22 @@ export const useRunner = create(
       init(canvas) {
         // eslint-disable-next-line no-undef
         console.log("can use shared memory:", crossOriginIsolated)
-        const { initPhys, initCpp } = get()
+        const { initPhys, initCpp, onWrite } = get()
 
         set(state => ({
           ...state,
           sharedBuffer: new SharedArrayBuffer(31),
         }))
 
+        onWrite(`\x1b[1;92m>\x1b[0m Initializing Physics Engine (powered by Matter.js)\n`)
         initPhys(canvas)
         initCpp()
       },
       restart(type) {
-        const { phys, cpp, initCpp, onStatus } = get()
+        const { phys, cpp, initCpp, onStatus, onWrite } = get()
 
         if (type === "phys") {
+          onWrite(`\x1b[1;92m>\x1b[0m Initializing Physics Engine (powered by Matter.js)\n`)
           phys.port.postMessage({ id: "restart" })
         }
 
@@ -126,7 +136,7 @@ export const useRunner = create(
     }),
     {
       name: "runner-store",
-      version: 9,
+      version: 10,
       partialize: state => ({ code: state.code }),
     }
   )
