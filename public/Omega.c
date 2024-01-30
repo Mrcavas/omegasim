@@ -10,3 +10,8 @@ void setMotors(int8_t leftPower, int8_t rightPower) {
   setMotorLeft(leftPower);
   setMotorRight(rightPower);
 }
+
+void delay(uint64_t ms) {
+    uint64_t start = millis();
+    while (millis() - start < ms) {}
+}

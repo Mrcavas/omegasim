@@ -5,7 +5,7 @@
 #include <math.h>
 
 extern "C" uint64_t millis();
-extern "C" void delay(uint64_t time);
+void delay(uint64_t ms);
 
 extern "C" void setMotors(int8_t leftPower, int8_t rightPower);
 extern "C" void setMotorLeft(int8_t leftPower);
@@ -17,7 +17,5 @@ extern "C" uint16_t getUSDistance(uint8_t channel);
 extern "C" void setLed(uint8_t channel, bool state);
 extern "C" bool readButton(uint8_t channel);
 extern "C" void setServo(uint8_t channel, uint8_t angle);
-
-extern "C" void setXY(int16_t x, int16_t y);
 
 #endif

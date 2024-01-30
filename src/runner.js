@@ -5,19 +5,8 @@ import PhysWorker from "./physics/worker?worker"
 
 const defaultCode = `#include <Omega.h>
 
-float a = 0;
-
 int main() {
-    auto start = millis();
-
-    while (true) {
-        a = (millis() - start) * 0.001;
-        int16_t x = cos(a) * 200;
-        int16_t y = sin(2 * a) * 100;
-
-        setXY(x, y);
-        delay(1);
-    }
+    
 
     return 0;
 }`
@@ -42,6 +31,11 @@ const messageHandler = (set, get) => event => {
         [event.data.name]: event.data.data,
       },
     }))
+
+  if (event.data.id === "start_timer") {
+    const start = Date.now()
+    setInterval(() => console.log(`time: ${Date.now() - start}`), 1000)
+  }
 }
 
 export const useRunner = create(
@@ -107,14 +101,19 @@ export const useRunner = create(
 
         set(state => ({
           ...state,
-          sharedBuffer: new SharedArrayBuffer(23),
+          sharedBuffer: new SharedArrayBuffer(31),
         }))
 
         initPhys(canvas)
         initCpp()
       },
-      restart() {
-        const { cpp, initCpp, onStatus } = get()
+      restart(type) {
+        const { phys, cpp, initCpp, onStatus } = get()
+
+        if (type === "phys") {
+          phys.port.postMessage({ id: "restart" })
+        }
+
         onStatus("init")
         cpp.worker.terminate()
         cpp.port.close()
@@ -127,7 +126,7 @@ export const useRunner = create(
     }),
     {
       name: "runner-store",
-      version: 8,
+      version: 9,
       partialize: state => ({ code: state.code }),
     }
   )

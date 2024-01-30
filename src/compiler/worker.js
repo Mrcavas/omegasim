@@ -21,29 +21,27 @@ const callPhysCb =
 const readStateCb = (size, unsigned) => {
   const offset = currentOffset
   currentOffset += size
-  return value => dataView[`get${size === 8 ? "Big" : ""}${unsigned ? "Uint" : "Int"}${size * 8}`](offset, value)
+  return () => dataView[`get${size === 8 ? "Big" : ""}${unsigned ? "Uint" : "Int"}${size * 8}`](offset)
 }
 
+const readTime = readStateCb(8, true)
 const readUS = [readStateCb(2, true), readStateCb(2, true)]
 const readLine = [readStateCb(2, true), readStateCb(2, true)]
 const readBtn = [readStateCb(1), readStateCb(1), readStateCb(1)]
 
 const imports = {
-  millis() {
-    return BigInt(Date.now())
-  },
-  delay(ms) {
-    const start = Date.now()
-    while (Date.now() - start < ms) eval("") // try to trick vite to not optimize this
-  },
   setMotorLeft: callPhysCb("setMotorLeft"),
-  setMotorRight: callPhysCb("setMotorLeft"),
+  setMotorRight: callPhysCb("setMotorRight"),
   setLed: callPhysCb("setLed"),
-  setServo: callPhysCb("setMotorLeft"),
-  setXY: callPhysCb("setXY"),
+  setServo: callPhysCb("setServo"),
+  millis: () => readTime(),
   getUSDistance: channel => readUS[channel - 1](),
   getLineSensor: channel => readLine[channel - 1](),
   readButton: channel => readBtn[channel - 1](),
+  startTimer: () =>
+    sendMain({
+      id: "start_timer",
+    }),
 }
 
 self.addEventListener("message", async function messageHandler(event) {

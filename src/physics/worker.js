@@ -1,4 +1,4 @@
-import { events, initMatter } from "./init.js"
+import { events, initMatter, restart, setCameraScale, setTimeScale } from "./main.js"
 
 let port
 let currentOffset = 0
@@ -14,6 +14,7 @@ const updateStateCb = (size, unsigned) => {
   return value => dataView[`set${size === 8 ? "Big" : ""}${unsigned ? "Uint" : "Int"}${size * 8}`](offset, value)
 }
 
+export const updateTime = updateStateCb(8, true)
 export const updateUS1 = updateStateCb(2, true)
 export const updateUS2 = updateStateCb(2, true)
 export const updateLine1 = updateStateCb(2, true)
@@ -39,6 +40,10 @@ if (!self.isInitialized) {
       initMatter()
     }
 
+    if (event.data.id === "restart") {
+      restart()
+    }
+
     if (event.data.id === "canvas_resize") {
       canvas.width = event.data.width
       canvas.height = event.data.height
@@ -47,5 +52,8 @@ if (!self.isInitialized) {
     if (event.data.id === "call") {
       events.dispatchEvent(new CustomEvent(event.data.name, { detail: event.data.args }))
     }
+
+    if (event.data.id === "time_scale") setTimeScale(event.data.data)
+    if (event.data.id === "camera_scale") setCameraScale(event.data.data)
   })
 }
