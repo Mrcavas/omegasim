@@ -3,7 +3,7 @@ import { Memory } from "./memory.js"
 import { assert, ESUCCESS, getImportObject } from "./shared.js"
 
 export class MemFS {
-  constructor(options) {
+  constructor(modulePromise, options) {
     this.hostWrite = options.hostWrite
     this.stdinStr = options.stdinStr || ""
     this.stdinStrPos = 0
@@ -13,13 +13,12 @@ export class MemFS {
     // Imports for memfs module.
     const env = getImportObject(this, ["abort", "host_write", "host_read", "memfs_log", "copy_in", "copy_out"])
 
-    this.ready = WebAssembly.instantiateStreaming(fetch("/memfs.wasm", { cache: "force-cache" }), { env }).then(
-      ({ instance }) => {
-        // memfs
+    this.ready = modulePromise.then(module =>
+      WebAssembly.instantiate(module, { env }).then(instance => {
         this.exports = instance.exports
         this.mem = new Memory(this.exports.memory)
         this.exports.init()
-      }
+      })
     )
   }
 

@@ -11,7 +11,7 @@ export class API {
     this.hostCache = options.hostCache
     this.showTiming = options.showTiming || false
 
-    this.memfs = new MemFS({
+    this.memfs = new MemFS(this.getModule("/memfs.wasm"), {
       hostWrite: this.hostWrite,
     })
 
