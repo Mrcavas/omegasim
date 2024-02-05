@@ -40,13 +40,19 @@ if (!self.isInitialized) {
       initMatter()
     }
 
-    if (event.data.id === "restart") {
-      restart()
-    }
+    if (event.data.id === "restart") restart()
 
     if (event.data.id === "canvas_resize") {
       canvas.width = event.data.width
       canvas.height = event.data.height
+    }
+
+    if (event.data.id === "pan_change") {
+      events.dispatchEvent(new CustomEvent("pan_change", { detail: [event.data.isPanning, event.data.forced] }))
+    }
+
+    if (event.data.id === "pan_move") {
+      events.dispatchEvent(new CustomEvent("pan_move", { detail: [event.data.pan] }))
     }
 
     if (event.data.id === "call") {

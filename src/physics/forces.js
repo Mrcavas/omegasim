@@ -12,7 +12,6 @@ export function tick(delta, time) {
   if (time === 0) {
     addListener("setMotorLeft", pwm => (leftForce = pwmToForce(pwm)))
     addListener("setMotorRight", pwm => (rightForce = pwmToForce(pwm)))
-    console.log("first tick")
     console.log(car)
   }
 

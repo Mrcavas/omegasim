@@ -1,7 +1,8 @@
 import { Bodies, Composite, Engine, Events, Runner } from "matter-js"
-import { canvas, context, hostLog, updateTime } from "./worker.js"
+import { canvas, context, updateTime } from "./worker.js"
 import { body, m, PI, PX2M } from "./utils.js"
 import { resetForces, tick } from "./forces.js"
+import car_png from "/public/car.png"
 
 let frameHandle
 let vectorsForRender = []
@@ -9,8 +10,12 @@ export let engine
 let runner
 let cameraScale = 1,
   timeScale = 1
-export const events = new EventTarget()
+let panX, panY, startPan
 export let car
+
+const car_img = await createImageBitmap(await (await fetch(car_png)).blob())
+
+export const events = new EventTarget()
 const listeners = []
 export const addListener = (name, cb) => {
   events.addEventListener(name, e => cb(...e.detail))
@@ -20,7 +25,7 @@ const removeListeners = () => listeners.forEach(({ name, cb }) => events.removeE
 
 export const wheelFrontOffset = 0.02
 export const wheelSideOffset = 0.0125
-export const wheelDiameter = 0.046
+export const wheelDiameter = 0.065
 export const carWidth = 0.09
 export const carLength = 0.18
 
@@ -59,9 +64,9 @@ export function initMatter() {
 
   car = body(
     Bodies.fromVertices(0, 0, carVertices, {
-      friction: 1,
-      frictionAir: 1,
-      frictionStatic: 0.5,
+      friction: 0,
+      frictionAir: 0.2,
+      frictionStatic: 0,
     })
   )
 
@@ -102,7 +107,30 @@ export function initMatter() {
     [...Array(50).keys()].map(n => Bodies.rectangle(m(-0.1), m(0.5 + n * 2), m(0.01), m(1), { isStatic: true }))
   )
 
+  addListener("pan_change", (isPanning, forced) => {
+    if (isPanning) {
+      if (forced)
+        startPan = {
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+        }
+      panX = startPan.x
+      panY = startPan.y
+    } else {
+      startPan = { x: panX, y: panY }
+      panX = undefined
+      panY = undefined
+    }
+  })
+
+  addListener("pan_move", ({ x, y }) => {
+    panX = startPan.x + x
+    panY = startPan.y + y
+  })
+
   vectorsForRender = []
+  context.imageSmoothingEnabled = true
+  context.imageSmoothingQuality = "high"
   render()
 
   runner = Runner.create()
@@ -119,15 +147,15 @@ export const renderVector = (pos, vec) => vectorsForRender.push({ pos, vec: vec 
 
 const k = () => PX2M * 1000 * cameraScale
 
-const offsetX = () => canvas.width / 2 - car.position.x * k()
-const offsetY = () => canvas.height / 2 - car.position.y * k()
+const offsetX = () => panX ?? canvas.width / 2 - car.position.x * k()
+const offsetY = () => panY ?? canvas.height / 2 - car.position.y * k()
 
 function render() {
   const bodies = Composite.allBodies(engine.world)
 
   frameHandle = requestAnimationFrame(render)
 
-  context.fillStyle = "#000"
+  context.fillStyle = "#000000"
   context.fillRect(0, 0, canvas.width, canvas.height)
 
   context.beginPath()
@@ -156,6 +184,21 @@ function render() {
 }
 
 function renderBody(body) {
+  if (body === car) {
+    const x = car.position.x * k() + offsetX()
+    const y = car.position.y * k() + offsetY()
+
+    const w = m(carWidth + 2 * wheelSideOffset) * k()
+    const h = m(carLength) * k()
+
+    context.translate(x, y)
+    context.rotate(car.angle)
+    context.drawImage(car_img, -w / 2, -h / 2, w, h)
+    context.rotate(-car.angle)
+    context.translate(-x, -y)
+    return
+  }
+
   if (body.parts.length > 1) {
     for (let i = 1; i < body.parts.length; i++) renderBody(body.parts[i])
     return
