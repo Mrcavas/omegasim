@@ -33,6 +33,11 @@ export const wheelDiameter = 0.065
 export const carWidth = 0.123
 export const carLength = 0.22
 
+const k = () => PX2M * 1000 * cameraScale
+
+const offsetX = () => panX ?? canvas.width / 2 - car.position.x * k()
+const offsetY = () => panY ?? canvas.height / 2 - car.position.y * k()
+
 const carVertices = [
   m(carWidth, 0),
   m(carWidth, wheelFrontOffset),
@@ -115,8 +120,8 @@ export function initMatter() {
     if (isPanning) {
       if (forced)
         startPan = {
-          x: canvas.width / 2,
-          y: canvas.height / 2,
+          x: canvas.width / 2 - car.position.x * k(),
+          y: canvas.height / 2 - car.position.y * k(),
         }
       panX = startPan.x
       panY = startPan.y
@@ -148,11 +153,6 @@ export function initMatter() {
 }
 
 export const renderVector = (pos, vec) => vectorsForRender.push({ pos, vec: vec })
-
-const k = () => PX2M * 1000 * cameraScale
-
-const offsetX = () => panX ?? canvas.width / 2 - car.position.x * k()
-const offsetY = () => panY ?? canvas.height / 2 - car.position.y * k()
 
 function render() {
   const bodies = Composite.allBodies(engine.world)
@@ -189,6 +189,8 @@ function render() {
 
 function renderBody(body) {
   if (body === car) {
+    if (!car_img) return
+
     const x = car.position.x * k() + offsetX()
     const y = car.position.y * k() + offsetY()
 
@@ -197,7 +199,7 @@ function renderBody(body) {
 
     context.translate(x, y)
     context.rotate(car.angle)
-    if (car_img) context.drawImage(car_img, -w / 2, -h / 2, w, h)
+    context.drawImage(car_img, -w / 2, -h / 2, w, h)
     context.rotate(-car.angle)
     context.translate(-x, -y)
     return

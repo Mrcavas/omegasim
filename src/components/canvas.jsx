@@ -45,6 +45,7 @@ export default forwardRef(function Canvas({ isPanning, setIsPanning, setCameraSc
           })
         }
       }}
+      onMouseLeave={() => setMovingOrigin()}
       onWheel={e => {
         setCameraScale(scale => Math.max(0, Math.min(100, scale - e.deltaY * 0.02)))
       }}
