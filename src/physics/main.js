@@ -13,7 +13,11 @@ let cameraScale = 1,
 let panX, panY, startPan
 export let car
 
-const car_img = await createImageBitmap(await (await fetch(car_png)).blob())
+let car_img
+fetch(car_png)
+  .then(res => res.blob())
+  .then(blob => createImageBitmap(blob))
+  .then(img => (car_img = img))
 
 export const events = new EventTarget()
 const listeners = []
@@ -193,10 +197,10 @@ function renderBody(body) {
 
     context.translate(x, y)
     context.rotate(car.angle)
-    context.drawImage(car_img, -w / 2, -h / 2, w, h)
+    if (car_img) context.drawImage(car_img, -w / 2, -h / 2, w, h)
     context.rotate(-car.angle)
     context.translate(-x, -y)
-    // return
+    return
   }
 
   if (body.parts.length > 1) {
