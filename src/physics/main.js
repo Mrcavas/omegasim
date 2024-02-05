@@ -26,8 +26,8 @@ const removeListeners = () => listeners.forEach(({ name, cb }) => events.removeE
 export const wheelFrontOffset = 0.02
 export const wheelSideOffset = 0.0125
 export const wheelDiameter = 0.065
-export const carWidth = 0.09
-export const carLength = 0.18
+export const carWidth = 0.123
+export const carLength = 0.22
 
 const carVertices = [
   m(carWidth, 0),
@@ -99,7 +99,7 @@ export function initMatter() {
     ),
   ])
 
-  car.setMass(m(1))
+  car.setMass(m(0.858))
 
   Composite.addBody(engine.world, car)
   Composite.add(
@@ -196,7 +196,7 @@ function renderBody(body) {
     context.drawImage(car_img, -w / 2, -h / 2, w, h)
     context.rotate(-car.angle)
     context.translate(-x, -y)
-    return
+    // return
   }
 
   if (body.parts.length > 1) {
