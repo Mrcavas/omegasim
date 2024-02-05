@@ -3,7 +3,7 @@
 
 extern "C" void initOmega() {
     setbuf(stdout, NULL);
-    printf("\x1b[96mInitializing Omega \x1b[1mv. a1\x1b[0m\n");
+    printf("\x1b[96mInitializing Omega \x1b[1mv. a1.01\x1b[0m\n");
 }
 
 void setMotors(int8_t leftPower, int8_t rightPower) {
