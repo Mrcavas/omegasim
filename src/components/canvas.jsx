@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
+import { forwardRef, useImperativeHandle, useRef, useState } from "react"
 import { useRunner } from "../runner.js"
 
 export default forwardRef(function Canvas({ isPanning, setIsPanning, setCameraScale }, ref) {

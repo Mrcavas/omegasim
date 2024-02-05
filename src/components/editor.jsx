@@ -7,20 +7,22 @@ export default function Editor() {
     setCode,
   }))
 
-  return <MonacoEditor
-    value={code}
-    language={"cpp"}
-    theme="vs-dark"
-    wrapperProps={{
-      className: "h-full",
-    }}
-    options={{
-      minimap: {
-        enabled: false,
-      },
-      fontSize: 18,
-      wordWrap: "on"
-    }}
-    onChange={(code) => setCode(code)}
-  />
+  return (
+    <MonacoEditor
+      value={code}
+      language={"cpp"}
+      theme="vs-dark"
+      wrapperProps={{
+        className: "h-full",
+      }}
+      options={{
+        minimap: {
+          enabled: false,
+        },
+        fontSize: 18,
+        wordWrap: "on",
+      }}
+      onChange={code => setCode(code)}
+    />
+  )
 }

@@ -12,7 +12,7 @@ export class NotImplemented extends Error {
 }
 
 export class AbortError extends Error {
-  constructor(msg = 'abort') {
+  constructor(msg = "abort") {
     super(msg)
   }
 }

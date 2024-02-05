@@ -19,15 +19,19 @@ export class Memory {
   read8(o) {
     return this.u8[o]
   }
+
   read32(o) {
     return this.u32[o >> 2]
   }
+
   write8(o, v) {
     this.u8[o] = v
   }
+
   write32(o, v) {
     this.u32[o >> 2] = v
   }
+
   write64(o, vlo, vhi = 0) {
     this.write32(o, vlo)
     this.write32(o + 4, vhi)
