@@ -1,8 +1,10 @@
 import { Bodies, Composite, Engine, Events, Runner } from "matter-js"
 import { canvas, context, updateTime } from "./worker.js"
 import { body, m, PI, PX2M } from "./utils.js"
-import { resetForces, tick } from "./forces.js"
+import { resetForces, tick } from "./tick.js"
 import car_png from "/car.png?url"
+import line_png from "/line.png?url"
+import Liner from "./sensors/liner.js"
 
 let frameHandle
 let vectorsForRender = []
@@ -19,6 +21,12 @@ fetch(car_png)
   .then(blob => createImageBitmap(blob))
   .then(img => (car_img = img))
 
+let line_img
+fetch(line_png)
+  .then(res => res.blob())
+  .then(blob => createImageBitmap(blob))
+  .then(img => (line_img = img))
+
 export const events = new EventTarget()
 const listeners = []
 export const addListener = (name, cb) => {
@@ -33,10 +41,13 @@ export const wheelDiameter = 0.065
 export const carWidth = 0.123
 export const carLength = 0.22
 
-const k = () => PX2M * 1000 * cameraScale
+export const lineSize = m(1.075, 3.025)
+export const linePosition = m(-1.075 / 2, -3.025 + 0.025 / 2)
 
-const offsetX = () => panX ?? canvas.width / 2 - car.position.x * k()
-const offsetY = () => panY ?? canvas.height / 2 - car.position.y * k()
+export const k = () => PX2M * 1000 * cameraScale
+
+export const offsetX = () => panX ?? canvas.width / 2 - car.position.x * k()
+export const offsetY = () => panY ?? canvas.height / 2 - car.position.y * k()
 
 const carVertices = [
   m(carWidth, 0),
@@ -79,6 +90,15 @@ export function initMatter() {
     })
   )
 
+  car.setAngle(PI * 1.5)
+
+  car.slots = {
+    1: new Liner(1, car, 1),
+    2: new Liner(2, car, 2),
+    3: null,
+    4: null,
+  }
+
   const centerX = carWidth / 2
   const centerY = carLength / 2
 
@@ -111,10 +131,6 @@ export function initMatter() {
   car.setMass(m(0.858))
 
   Composite.addBody(engine.world, car)
-  Composite.add(
-    engine.world,
-    [...Array(50).keys()].map(n => Bodies.rectangle(m(-0.1), m(0.5 + n * 2), m(0.01), m(1), { isStatic: true }))
-  )
 
   addListener("pan_change", (isPanning, forced) => {
     if (isPanning) {
@@ -155,12 +171,22 @@ export function initMatter() {
 export const renderVector = (pos, vec) => vectorsForRender.push({ pos, vec: vec })
 
 function render() {
-  const bodies = Composite.allBodies(engine.world)
-
   frameHandle = requestAnimationFrame(render)
+
+  const bodies = Composite.allBodies(engine.world)
 
   context.fillStyle = "#000000"
   context.fillRect(0, 0, canvas.width, canvas.height)
+
+  if (line_img) {
+    context.drawImage(
+      line_img,
+      linePosition.x * k() + offsetX(),
+      linePosition.y * k() + offsetY(),
+      lineSize.x * k(),
+      lineSize.y * k()
+    )
+  }
 
   context.beginPath()
 
@@ -202,6 +228,8 @@ function renderBody(body) {
     context.drawImage(car_img, -w / 2, -h / 2, w, h)
     context.rotate(-car.angle)
     context.translate(-x, -y)
+
+    Object.values(car.slots).forEach(sensor => sensor?.render())
     return
   }
 
@@ -209,6 +237,7 @@ function renderBody(body) {
     for (let i = 1; i < body.parts.length; i++) renderBody(body.parts[i])
     return
   }
+
   const vertices = body.vertices
 
   context.moveTo(vertices[0].x * k() + offsetX(), vertices[0].y * k() + offsetY())

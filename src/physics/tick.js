@@ -9,6 +9,8 @@ export let leftForce = 0
 export let rightForce = 0
 
 export function tick(delta, time) {
+  Object.values(car.slots).forEach(sensor => sensor?.tick())
+
   if (time === 0) {
     addListener("setMotorLeft", pwm => (leftForce = pwmToForce(pwm)))
     addListener("setMotorRight", pwm => (rightForce = pwmToForce(pwm)))
@@ -24,11 +26,11 @@ export function tick(delta, time) {
   const leftForceVec = m(0, n(leftForce)).rotate(car.angle)
   const rightForceVec = m(0, n(rightForce)).rotate(car.angle)
 
-  car.applyForce(leftPos, leftForceVec)
-  car.applyForce(rightPos, rightForceVec)
-
   renderVector(leftPos, leftForceVec)
   renderVector(rightPos, rightForceVec)
+
+  car.applyForce(leftPos, leftForceVec)
+  car.applyForce(rightPos, rightForceVec)
 }
 
 export function resetForces() {
