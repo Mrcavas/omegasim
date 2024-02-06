@@ -2,7 +2,7 @@ import { Bodies, Composite, Engine, Events, Runner } from "matter-js"
 import { canvas, context, updateTime } from "./worker.js"
 import { body, m, PI, PX2M } from "./utils.js"
 import { resetForces, tick } from "./forces.js"
-import car_png from "/public/car.png"
+import car_png from "/car.png?url"
 
 let frameHandle
 let vectorsForRender = []
