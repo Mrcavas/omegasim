@@ -63,10 +63,10 @@ export default function App() {
 
   return (
     <Splitter className="h-full">
-      <SplitterPanel className="overflow-hidden" size={40}>
+      <SplitterPanel className="overflow-hidden" size={25}>
         <Editor />
       </SplitterPanel>
-      <SplitterPanel className="flex flex-col gap-2 p-2 overflow-hidden" size={60}>
+      <SplitterPanel className="flex flex-col gap-2 p-2 overflow-hidden" size={75}>
         <div className="relative flex flex-row gap-2 justify-between">
           <Button
             icon={status !== "running" ? "pi pi-caret-right" : "pi pi-stop"}

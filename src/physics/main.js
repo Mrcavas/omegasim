@@ -42,7 +42,8 @@ export const carWidth = 0.123
 export const carLength = 0.22
 
 export const lineSize = m(1.075, 3.025)
-export const linePosition = m(-1.075 / 2, -3.025 + 0.025 / 2)
+// export const linePosition = m(-1.075 / 2, -3.025 + 0.025 / 2)
+export const linePosition = m(-0.15, -3.025 + 0.025 / 2)
 
 export const k = () => PX2M * 1000 * cameraScale
 
@@ -85,7 +86,7 @@ export function initMatter() {
   car = body(
     Bodies.fromVertices(0, 0, carVertices, {
       friction: 0,
-      frictionAir: 0.2,
+      frictionAir: 0.15,
       frictionStatic: 0,
     })
   )
