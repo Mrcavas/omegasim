@@ -13,9 +13,8 @@ let leftVoltage = 0
 let rightVoltage = 0
 let leftForceVec, rightForceVec
 
-const R = 5.4
+const R = 2.6
 const min_vel = 3
-const friction = 0
 
 let last_vel_dir = 0
 

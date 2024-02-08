@@ -9,14 +9,19 @@ const sendMain = message => port.postMessage(message)
 const sendPhys = message => port.postMessage({ id: "to_phys", message })
 const hostWrite = msg => sendMain({ id: "write", data: msg })
 
-const callPhysCb =
-  name =>
-  (...args) =>
+let lastCalls = {}
+
+const callPhysCb = name => {
+  return (...args) => {
+    if (performance.now() - (lastCalls[name] ?? 0) < 4) return
     sendPhys({
       id: "call",
       name,
       args,
     })
+    lastCalls[name] = performance.now()
+  }
+}
 
 const readStateCb = (size, unsigned) => {
   const offset = currentOffset

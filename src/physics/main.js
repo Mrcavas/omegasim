@@ -35,6 +35,8 @@ export const addListener = (name, cb) => {
 }
 const removeListeners = () => listeners.forEach(({ name, cb }) => events.removeEventListener(name, cb))
 
+let runnerHandle
+
 export const wheelFrontOffset = 0.02
 export const wheelSideOffset = 0.0125
 export const wheelDiameter = 0.065
@@ -51,6 +53,8 @@ export const k = () => PX2M * 500 * cameraScale
 
 export const offsetX = () => panX ?? canvas.width / 2 - car.position.x * k()
 export const offsetY = () => panY ?? canvas.height / 2 - car.position.y * k()
+
+const FPS = 500
 
 const carVertices = [
   m(carWidth, 0),
@@ -81,7 +85,7 @@ export function initMatter() {
       y: 0,
     },
     timing: {
-      timeScale,
+      // timeScale,
     },
   })
 
@@ -167,15 +171,16 @@ export function initMatter() {
   render()
 
   runner = Runner.create({
-    delta: 1000 / 120,
-    // isFixed: true,
-    deltaSampleSize: 120,
-    deltaMin: 1000 / 120,
-    deltaMax: 1000 / 60,
-    fps: 120,
+    fps: FPS,
   })
 
-  Runner.run(runner, engine)
+  // Runner.run(runner, engine)
+
+  runnerHandle = setInterval(() => {
+    if (runner.enabled) {
+      Runner.tick(runner, engine, performance.now())
+    }
+  }, 1000 / FPS)
 
   Events.on(runner, "beforeTick", ({ timestamp }) => {
     vectorsForRender = []
@@ -273,6 +278,7 @@ export function restart() {
   cancelAnimationFrame(frameHandle)
   removeListeners()
   resetForces()
+  clearInterval(runnerHandle)
   Runner.stop(runner)
   initMatter()
 }

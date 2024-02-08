@@ -43,10 +43,10 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (!phys?.port) return
     let normalizedTimeScale = 1
     if (timeScale < 50) normalizedTimeScale = timeScale / 50
-    if (timeScale > 50) normalizedTimeScale = (timeScale / 50) * 2 - 1
-    if (!phys?.port) return
+    if (timeScale > 50) normalizedTimeScale = ((timeScale - 50) / 50) * 4 + 1
     phys.port.postMessage({
       id: "time_scale",
       data: normalizedTimeScale,
@@ -147,9 +147,13 @@ export default function App() {
               value={timeScale}
               step={0.1}
               onChange={e => {
+                if (e.value < 3) return setTimeScale(0)
                 if (22 < e.value && e.value < 28) return setTimeScale(25)
                 if (47 < e.value && e.value < 53) return setTimeScale(50)
+                if (59.5 < e.value && e.value < 65.5) return setTimeScale(62.5)
                 if (72 < e.value && e.value < 78) return setTimeScale(75)
+                if (84.5 < e.value && e.value < 90.5) return setTimeScale(87.5)
+                if (e.value > 97) return setTimeScale(100)
                 setTimeScale(e.value)
               }}
               className="w-full"

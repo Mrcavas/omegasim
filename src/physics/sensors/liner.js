@@ -42,7 +42,6 @@ export default class Liner extends Sensor {
     const pos = this.position.sub(linePositionMargined)
     const x = Math.round(pos.x),
       y = Math.round(pos.y)
-    console.log(delta)
     if (this.id === 1) updateLine1(this.valueFromColor(this.getColorOn(x, y)))
     if (this.id === 2) updateLine2(this.valueFromColor(this.getColorOn(x, y)))
   }
