@@ -1,7 +1,7 @@
 import { Bodies, Composite, Engine, Events, Runner } from "matter-js"
 import { canvas, context, updateTime } from "./worker.js"
-import { body, m, PI, PX2M } from "./utils.js"
-import { resetForces, tick } from "./tick.js"
+import { body, m, PI, PX2M, v } from "./utils.js"
+import { afterTick, resetForces, tick } from "./tick.js"
 import car_png from "/car.png?url"
 import line_png from "/line.png?url"
 import Liner from "./sensors/liner.js"
@@ -42,10 +42,12 @@ export const carWidth = 0.123
 export const carLength = 0.22
 
 export const lineSize = m(1.075, 3.025)
-// export const linePosition = m(-1.075 / 2, -3.025 + 0.025 / 2)
-export const linePosition = m(-0.15, -3.025 + 0.025 / 2)
+export const linePosition = m(-1.075 / 2, -3.025 + 0.025 / 2)
+// export const linePosition = m(-0.15, -3.025 + 0.025 / 2)
+// export const linePosition = v(-753, -7240)
+export const linePositionMargined = linePosition.add(m(-0.003, -0.003))
 
-export const k = () => PX2M * 1000 * cameraScale
+export const k = () => PX2M * 500 * cameraScale
 
 export const offsetX = () => panX ?? canvas.width / 2 - car.position.x * k()
 export const offsetY = () => panY ?? canvas.height / 2 - car.position.y * k()
@@ -103,27 +105,32 @@ export function initMatter() {
   const centerX = carWidth / 2
   const centerY = carLength / 2
 
-  const offsetX = wheelSideOffset / 2 - centerX
-  const offsetY = wheelDiameter / 2 - centerY
+  const partOffsetX = wheelSideOffset / 2 - centerX
+  const partOffsetY = wheelDiameter / 2 - centerY
 
   car.setParts([
     Bodies.rectangle(0, 0, m(carWidth), m(carLength)),
     Bodies.rectangle(
-      m(-wheelSideOffset + offsetX),
-      m(wheelFrontOffset + offsetY),
-      m(wheelSideOffset),
-      m(wheelDiameter)
-    ),
-    Bodies.rectangle(m(carWidth + offsetX), m(wheelFrontOffset + offsetY), m(wheelSideOffset), m(wheelDiameter)),
-    Bodies.rectangle(
-      m(-wheelSideOffset + offsetX),
-      m(carLength - wheelFrontOffset - wheelDiameter + offsetY),
+      m(-wheelSideOffset + partOffsetX),
+      m(wheelFrontOffset + partOffsetY),
       m(wheelSideOffset),
       m(wheelDiameter)
     ),
     Bodies.rectangle(
-      m(carWidth + offsetX),
-      m(carLength - wheelFrontOffset - wheelDiameter + offsetY),
+      m(carWidth + partOffsetX),
+      m(wheelFrontOffset + partOffsetY),
+      m(wheelSideOffset),
+      m(wheelDiameter)
+    ),
+    Bodies.rectangle(
+      m(-wheelSideOffset + partOffsetX),
+      m(carLength - wheelFrontOffset - wheelDiameter + partOffsetY),
+      m(wheelSideOffset),
+      m(wheelDiameter)
+    ),
+    Bodies.rectangle(
+      m(carWidth + partOffsetX),
+      m(carLength - wheelFrontOffset - wheelDiameter + partOffsetY),
       m(wheelSideOffset),
       m(wheelDiameter)
     ),
@@ -135,13 +142,13 @@ export function initMatter() {
 
   addListener("pan_change", (isPanning, forced) => {
     if (isPanning) {
-      if (forced)
+      if (forced || !startPan)
         startPan = {
           x: canvas.width / 2 - car.position.x * k(),
           y: canvas.height / 2 - car.position.y * k(),
         }
-      panX = startPan.x
-      panY = startPan.y
+      panX = startPan?.x
+      panY = startPan?.y
     } else {
       startPan = { x: panX, y: panY }
       panX = undefined
@@ -159,13 +166,25 @@ export function initMatter() {
   context.imageSmoothingQuality = "high"
   render()
 
-  runner = Runner.create()
+  runner = Runner.create({
+    delta: 1000 / 120,
+    // isFixed: true,
+    deltaSampleSize: 120,
+    deltaMin: 1000 / 120,
+    deltaMax: 1000 / 60,
+    fps: 120,
+  })
+
   Runner.run(runner, engine)
 
   Events.on(runner, "beforeTick", ({ timestamp }) => {
     vectorsForRender = []
     updateTime(BigInt(Math.trunc(timestamp)))
     tick(engine.timing.lastDelta / 1000, timestamp / 1000)
+  })
+
+  Events.on(runner, "afterTick", ({ timestamp }) => {
+    afterTick(engine.timing.lastDelta / 1000, timestamp / 1000)
   })
 }
 
@@ -176,7 +195,7 @@ function render() {
 
   const bodies = Composite.allBodies(engine.world)
 
-  context.fillStyle = "#000000"
+  context.fillStyle = "#080808"
   context.fillRect(0, 0, canvas.width, canvas.height)
 
   if (line_img) {
@@ -203,12 +222,12 @@ function render() {
     context.moveTo(pos.x * k() + offsetX(), pos.y * k() + offsetY())
     context.lineTo((pos.x + vec.x) * k() + offsetX(), (pos.y + vec.y) * k() + offsetY())
 
-    context.lineWidth = 3
+    context.lineWidth = m(0.0025) * k()
     context.strokeStyle = "#f00"
     context.stroke()
 
     context.beginPath()
-    context.arc(pos.x * k() + offsetX(), pos.y * k() + offsetY(), 5, 0, 2 * PI, false)
+    context.arc(pos.x * k() + offsetX(), pos.y * k() + offsetY(), m(0.004) * k(), 0, 2 * PI, false)
     context.fillStyle = "#f00"
     context.fill()
   })

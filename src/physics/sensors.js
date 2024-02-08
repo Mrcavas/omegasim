@@ -14,8 +14,8 @@ export default class Sensor {
 
   get insidePosition() {
     return {
-      1: m(-0.0156, 0.0926),
-      2: m(0.0156, 0.0926),
+      1: m(0.0156, 0.0926),
+      2: m(-0.0156, 0.0926),
     }[this.slot]
   }
 
