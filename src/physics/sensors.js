@@ -9,7 +9,7 @@ export default class Sensor {
   constructor(slot, car, img) {
     this.slot = slot
     this.car = car
-    this.img = img
+    img.then(loaded => (this.img = loaded))
   }
 
   get insidePosition() {

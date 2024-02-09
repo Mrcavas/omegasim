@@ -6,11 +6,9 @@ import { v } from "../utils.js"
 import { UPNG } from "../../assets/UPNG.js"
 import { updateLine1, updateLine2 } from "../worker.js"
 
-let liner_img
-fetch(liner_png)
+let liner_img = fetch(liner_png)
   .then(res => res.blob())
   .then(blob => createImageBitmap(blob))
-  .then(img => (liner_img = img))
 
 let dist_data, width, height
 fetch(dist_png)
