@@ -6,22 +6,30 @@ import PhysWorker from "./physics/worker?worker"
 const defaultCode = `#include <Omega.h>
 
 int main() {
-    auto start = millis();
+  while (true) {
+    auto liner1 = getLineSensor(1);
+    auto liner2 = getLineSensor(2);
 
-    while (true) {
-        auto dt = (millis() - start) * 0.001;
-
-        setMotors(sin(dt) * 100, cos(dt) * 100);
-
-        delay(1);
+    auto liner1OnLine = liner1 >= 800;
+    auto liner2OnLine = liner2 >= 800;
+    
+    if (!liner1OnLine && !liner2OnLine) {
+      setMotors(35, 35);
     }
+    if (liner1OnLine && !liner2OnLine) {
+      setMotors(100, -50);
+    }
+    if (!liner1OnLine && liner2OnLine) {
+      setMotors(-50, 100);
+    }
+  }
 
-    return 0;
+  return 0;
 }`
 
 const messageHandler = (set, get) => event => {
   if (!get()) return
-  const { cpp, phys, onWrite, onStatus } = get()
+  const { cpp, phys, onWrite, onStatus, onSlowSpeed } = get()
 
   if (event.data.id === "to_phys") phys.port.postMessage(event.data.message)
 
@@ -44,6 +52,8 @@ const messageHandler = (set, get) => event => {
     const start = Date.now()
     setInterval(() => console.log(`time: ${Date.now() - start}`), 1000)
   }
+
+  if (event.data.id === "slow_speed") onSlowSpeed()
 }
 
 export const useRunner = create(
@@ -55,6 +65,8 @@ export const useRunner = create(
       setOnWrite: onWrite => set({ ...get(), onWrite }),
       onStatus: null,
       setOnStatus: onStatus => set({ ...get(), onStatus }),
+      onSlowSpeed: null,
+      setOnSlowSpeed: onSlowSpeed => set({ ...get(), onSlowSpeed }),
       clearLogs: null,
       setClearLogs: clearLogs => set({ ...get(), clearLogs }),
       code: defaultCode,

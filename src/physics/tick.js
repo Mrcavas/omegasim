@@ -1,4 +1,4 @@
-import { addListener, car, carWidth, renderVector } from "./main.js"
+import { addListener, car, carWidth, engine, renderVector } from "./main.js"
 import { m, PX2M, v } from "./utils.js"
 
 export const n = v => v / 200 // convert to newtons
@@ -13,7 +13,7 @@ let leftVoltage = 0
 let rightVoltage = 0
 let leftForceVec, rightForceVec
 
-const R = 2.6
+const R = 5.4
 const min_vel = 3
 
 let last_vel_dir = 0

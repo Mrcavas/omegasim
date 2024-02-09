@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <math.h>
 
+void setup();
+void loop();
+
 extern "C" uint64_t millis();
 void delay(uint64_t ms);
 

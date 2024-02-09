@@ -8,15 +8,17 @@ import { useEffect, useRef, useState } from "react"
 
 import Logs from "./components/logs.jsx"
 import Canvas from "./components/canvas.jsx"
+import { Tooltip } from "primereact/tooltip"
 
 export default function App() {
-  const { init, runCode, clearLogs, restart, setOnStatus, phys } = useRunner(
-    ({ init, runCode, clearLogs, restart, setOnStatus, phys }) => ({
+  const { init, runCode, clearLogs, restart, setOnStatus, setOnSlowSpeed, phys } = useRunner(
+    ({ init, runCode, clearLogs, restart, setOnStatus, setOnSlowSpeed, phys }) => ({
       init,
       runCode,
       clearLogs,
       restart,
       setOnStatus,
+      setOnSlowSpeed,
       phys,
     })
   )
@@ -28,10 +30,20 @@ export default function App() {
   const [timeScale, setTimeScale] = useState(50)
   const [cameraScale, setCameraScale] = useState(50)
   const [isPanning, setIsPanning] = useState(false)
+  const [speed, setSpeed] = useState(1)
+  const [showWarning, setShowWarning] = useState(false)
 
   useEffect(() => {
     init(canvasRef.current)
     setOnStatus(setStatus)
+    let lastDisableHandle
+    setOnSlowSpeed(() => {
+      setShowWarning(true)
+      clearTimeout(lastDisableHandle)
+      lastDisableHandle = setTimeout(() => {
+        setShowWarning(false)
+      }, 1000)
+    })
     const port = useRunner.getState().phys.port
     new ResizeObserver(() => {
       port.postMessage({
@@ -47,6 +59,7 @@ export default function App() {
     let normalizedTimeScale = 1
     if (timeScale < 50) normalizedTimeScale = timeScale / 50
     if (timeScale > 50) normalizedTimeScale = ((timeScale - 50) / 50) * 4 + 1
+    setSpeed(normalizedTimeScale)
     phys.port.postMessage({
       id: "time_scale",
       data: normalizedTimeScale,
@@ -63,17 +76,24 @@ export default function App() {
 
   return (
     <Splitter className="h-full">
-      <SplitterPanel className="overflow-hidden" size={25}>
+      <SplitterPanel className="overflow-hidden" size={35}>
         <Editor />
       </SplitterPanel>
-      <SplitterPanel className="flex flex-col gap-2 p-2 overflow-hidden" size={75}>
+      <SplitterPanel className="flex flex-col gap-2 p-2 overflow-hidden" size={65}>
         <div className="relative flex flex-row gap-2 justify-between">
           <Button
             icon={status !== "running" ? "pi pi-caret-right" : "pi pi-stop"}
             severity={status !== "running" ? "success" : "danger"}
             rounded
             text
-            onClick={status !== "running" ? runCode : () => restart()}
+            onClick={
+              status !== "running"
+                ? runCode
+                : () => {
+                    restart()
+                    restart("phys")
+                  }
+            }
             disabled={status === "init"}
           />
 
@@ -142,7 +162,7 @@ export default function App() {
         </div>
         {tab === 0 && (
           <div className="w-full flex flex-row gap-5 items-center p-2">
-            <div className="shrink-0">Time scale</div>
+            <div className="shrink-0">Скорость времени</div>
             <Slider
               value={timeScale}
               step={0.1}
@@ -158,6 +178,23 @@ export default function App() {
               }}
               className="w-full"
             />
+            <div className="shrink-0 w-12 overflow-hidden grid place-items-center">
+              {showWarning && status === "running" ? (
+                <>
+                  <div
+                    data-pr-position="left"
+                    data-pr-at="left-5 center"
+                    data-pr-my="right center"
+                    className="warning-sign pi pi-exclamation-triangle text-[#f87171]"
+                  />
+                  <Tooltip target=".warning-sign">
+                    Симуляция может быть нестабильна! Возможно стоит уменьшить скорость
+                  </Tooltip>
+                </>
+              ) : (
+                <div>{speed.toFixed(2)}</div>
+              )}
+            </div>
           </div>
         )}
         <Logs
