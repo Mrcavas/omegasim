@@ -5,26 +5,24 @@ import PhysWorker from "./physics/worker?worker"
 
 const defaultCode = `#include <Omega.h>
 
-int main() {
-  while (true) {
-    auto liner1 = getLineSensor(1);
-    auto liner2 = getLineSensor(2);
+void setup() {}
 
-    auto liner1OnLine = liner1 >= 800;
-    auto liner2OnLine = liner2 >= 800;
-    
-    if (!liner1OnLine && !liner2OnLine) {
-      setMotors(35, 35);
-    }
-    if (liner1OnLine && !liner2OnLine) {
-      setMotors(100, -50);
-    }
-    if (!liner1OnLine && liner2OnLine) {
-      setMotors(-50, 100);
-    }
+void loop() {
+  auto liner1 = getLineSensor(1);
+  auto liner2 = getLineSensor(2);
+
+  auto liner1OnLine = liner1 >= 800;
+  auto liner2OnLine = liner2 >= 800;
+  
+  if (!liner1OnLine && !liner2OnLine) {
+    setMotors(35, 35);
   }
-
-  return 0;
+  if (liner1OnLine && !liner2OnLine) {
+    setMotors(100, -50);
+  }
+  if (!liner1OnLine && liner2OnLine) {
+    setMotors(-50, 100);
+  }
 }`
 
 const messageHandler = (set, get) => event => {
@@ -148,7 +146,7 @@ export const useRunner = create(
     }),
     {
       name: "runner-store",
-      version: 11,
+      version: 12,
       partialize: state => ({ code: state.code }),
     }
   )
