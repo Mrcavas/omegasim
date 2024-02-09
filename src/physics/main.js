@@ -198,7 +198,7 @@ function render() {
 
   const bodies = Composite.allBodies(engine.world)
 
-  context.fillStyle = "#080808"
+  context.fillStyle = "#111111"
   context.fillRect(0, 0, canvas.width, canvas.height)
 
   if (line_img) {

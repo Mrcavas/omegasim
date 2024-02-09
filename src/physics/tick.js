@@ -54,6 +54,9 @@ export function tick(delta, time) {
 
   car.applyForce(leftPos, leftForceVec)
   car.applyForce(rightPos, rightForceVec)
+
+  // console.log(car.torque)
+  car.torque *= 1.55
 }
 
 export function afterTick(delta, time) {
