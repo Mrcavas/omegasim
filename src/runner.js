@@ -148,7 +148,7 @@ export const useRunner = create(
     }),
     {
       name: "runner-store",
-      version: 10,
+      version: 11,
       partialize: state => ({ code: state.code }),
     }
   )
