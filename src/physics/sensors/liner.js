@@ -1,5 +1,5 @@
 import Sensor from "../sensors.js"
-import { addListener, linePosition, linePositionMargined, renderVector } from "../main.js"
+import { linePositionMargined, renderVector } from "../main.js"
 import liner_png from "/liner.png?url"
 import dist_png from "/line_dist.png?url"
 import { v } from "../utils.js"
