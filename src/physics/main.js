@@ -42,10 +42,10 @@ export const wheelDiameter = 0.065
 export const carWidth = 0.123
 export const carLength = 0.22
 
-// export const lineSize = m(1.015, 1.015)
-// export const linePosition = m(-1.015 * 0.75 + carLength / 2, -1.015 + 0.025 / 2)
-export const lineSize = m(1.075, 3.025) // old
-export const linePosition = m(-1.075 / 2, -3.025 + 0.025 / 2) // old
+export const lineSize = m(1.015, 1.015)
+export const linePosition = m(-1.015 * 0.75 + carLength / 2, -1.015 + 0.025 / 2)
+// export const lineSize = m(1.075, 3.025) // old
+// export const linePosition = m(-1.075 / 2, -3.025 + 0.025 / 2) // old
 // export const linePosition = m(-0.15, -3.025 + 0.025 / 2)
 // export const linePosition = v(-753, -7240)
 export const linePositionMargined = linePosition.add(m(-0.003, -0.003))
