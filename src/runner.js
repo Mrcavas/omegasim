@@ -11,17 +11,17 @@ void loop() {
   auto liner1 = getLineSensor(1);
   auto liner2 = getLineSensor(2);
 
-  auto liner1OnLine = liner1 >= 800;
-  auto liner2OnLine = liner2 >= 800;
-  
+  auto liner1OnLine = liner1 >= 0.6;
+  auto liner2OnLine = liner2 >= 0.6;
+
   if (!liner1OnLine && !liner2OnLine) {
     setMotors(35, 35);
   }
   if (liner1OnLine && !liner2OnLine) {
-    setMotors(100, -50);
+    setMotors(90, -50);
   }
   if (!liner1OnLine && liner2OnLine) {
-    setMotors(-50, 100);
+    setMotors(-50, 90);
   }
 }`
 
@@ -146,7 +146,7 @@ export const useRunner = create(
     }),
     {
       name: "runner-store",
-      version: 12,
+      version: 13,
       partialize: state => ({ code: state.code }),
     }
   )
