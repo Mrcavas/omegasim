@@ -14,12 +14,12 @@ let lastCalls = {}
 const callPhysCb = name => {
   return (...args) => {
     if (performance.now() - (lastCalls[name] ?? 0) < 4) return
+    lastCalls[name] = performance.now()
     sendPhys({
       id: "call",
       name,
       args,
     })
-    lastCalls[name] = performance.now()
   }
 }
 
@@ -41,12 +41,9 @@ const imports = {
   setServo: callPhysCb("setServo"),
   millis: () => readTime(),
   getUSDistance: channel => readUS[channel - 1](),
-  getLineSensor: channel => readLine[channel - 1](),
+  getLineSensor: channel => Math.max(0, Math.min(1, ((readLine[channel - 1]() - 200) / 700 - 0.15) / 0.7)),
   readButton: channel => readBtn[channel - 1](),
-  startTimer: () =>
-    sendMain({
-      id: "start_timer",
-    }),
+  startTimer: () => sendMain({ id: "start_timer" }),
 }
 
 self.addEventListener("message", async function messageHandler(event) {

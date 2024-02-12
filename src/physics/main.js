@@ -91,7 +91,7 @@ export function initMatter() {
   car = body(
     Bodies.fromVertices(0, 0, carVertices, {
       friction: 0,
-      frictionAir: 0.15,
+      frictionAir: 0.22,
       frictionStatic: 0,
     })
   )

@@ -26,17 +26,19 @@ export default class Liner extends Sensor {
     this.id = id
   }
 
-  valueFromColor(color) {
-    const norm = color / 255
-    return 700 * (-2 * norm ** 3 + 3 * norm ** 2) + 200
-  }
-
   getColorOn(x, y) {
     if (0 > x || x > width - 1 || 0 > y || y > height - 1) return 0
     return dist_data[(y * width + x) * 4]
   }
 
+  valueFromColor(color) {
+    const norm = color / 255
+    return (-2 * norm ** 3 + 3 * norm ** 2) * 700 + 200
+  }
+
   tick(delta, time) {
+    // if (time !== 0 && time - this.lastTick < 15) return
+    // this.lastTick = time
     const pos = this.position.sub(linePositionMargined)
     const x = Math.round(pos.x),
       y = Math.round(pos.y)

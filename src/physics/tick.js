@@ -13,8 +13,13 @@ let leftVoltage = 0
 let rightVoltage = 0
 let leftForceVec, rightForceVec
 
+const MAX_ENTRIES = 3
+let lastLeftForces = new Array(MAX_ENTRIES).fill(0),
+  lastRightForces = new Array(MAX_ENTRIES).fill(0)
+let forceI = 0
+
 const R = 5.4
-const min_vel = 3
+const min_vel = 2.2
 
 let last_vel_dir = 0
 
@@ -49,14 +54,22 @@ export function tick(delta, time) {
   const leftForce = (Math.sign(leftVoltage) * leftVoltage ** 2) / (R * vel_dir_pred)
   const rightForce = (Math.sign(rightVoltage) * rightVoltage ** 2) / (R * vel_dir_pred)
 
-  leftForceVec = m(0, n(leftForce)).rotate(car.angle)
-  rightForceVec = m(0, n(rightForce)).rotate(car.angle)
+  lastLeftForces[forceI] = leftForce
+  lastRightForces[forceI] = rightForce
+  forceI = (forceI + 1) % MAX_ENTRIES
+
+  const resLeftForce = lastLeftForces.reduce((ps, v) => ps + v, 0) / MAX_ENTRIES
+  const resRightForce = lastRightForces.reduce((ps, v) => ps + v, 0) / MAX_ENTRIES
+
+  leftForceVec = m(0, n(resLeftForce)).rotate(car.angle)
+  rightForceVec = m(0, n(resRightForce)).rotate(car.angle)
 
   car.applyForce(leftPos, leftForceVec)
   car.applyForce(rightPos, rightForceVec)
 
   // console.log(car.torque)
-  car.torque *= 1.55
+  // car.torque *= 1.55
+  car.torque *= 3
 }
 
 export function afterTick(delta, time) {

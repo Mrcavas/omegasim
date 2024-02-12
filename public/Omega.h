@@ -14,7 +14,7 @@ extern "C" void setMotors(int8_t leftPower, int8_t rightPower);
 extern "C" void setMotorLeft(int8_t leftPower);
 extern "C" void setMotorRight(int8_t rightPower);
 
-extern "C" uint16_t getLineSensor(uint8_t channel);
+extern "C" float getLineSensor(uint8_t channel);
 extern "C" uint16_t getUSDistance(uint8_t channel);
 
 extern "C" void setLed(uint8_t channel, bool state);
