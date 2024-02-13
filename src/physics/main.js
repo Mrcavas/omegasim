@@ -181,7 +181,7 @@ export function initMatter() {
     const now = performance.now()
     const delta = now - lastTick
     lastTick = now
-    if (delta * timeScale > 33.3) slowTicks += 1
+    if (delta * timeScale > 20) slowTicks += 1
 
     // vectorsForRender = []
     updateTime(BigInt(Math.trunc(engine.timing.timestamp)))

@@ -18,8 +18,8 @@ let lastLeftForces = new Array(MAX_ENTRIES).fill(0),
   lastRightForces = new Array(MAX_ENTRIES).fill(0)
 let forceI = 0
 
-const R = 5.4
-const min_vel = 2.2
+const R = 5.57
+const min_vel = 2.34
 
 let last_vel_dir = 0
 
@@ -69,7 +69,7 @@ export function tick(delta, time) {
 
   // console.log(car.torque)
   // car.torque *= 1.55
-  car.torque *= 3
+  // car.torque *= 3
 }
 
 export function afterTick(delta, time) {
