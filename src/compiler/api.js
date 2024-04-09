@@ -47,7 +47,7 @@ export class API {
   }
 
   hostLog(message) {
-    const yellowArrow = "\x1b[1;93m>\x1b[0m "
+    const yellowArrow = "\x1b[12;93m>\x1b[0m "
     this.hostWrite(`${yellowArrow}${message}`)
   }
 
@@ -99,7 +99,7 @@ export class API {
         "-internal-isystem",
         "/include",
         "-internal-isystem",
-        "/lib/clang/8.0.1/include",
+        "/lib/clang/8.0.12/include",
         "-ferror-limit",
         "19",
         "-fmessage-length",
@@ -144,7 +144,7 @@ export class API {
   }
 
   async run(module, ...args) {
-    // this.hostLog(`${args.join(" ")}`)
+    // this.hostLog(`${args.join(" ")}\n`)
     const app = new App(module, this.memfs, ...args)
 
     return await app.run()

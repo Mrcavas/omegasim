@@ -1,8 +1,8 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react"
-import { useRunner } from "../runner.js"
+import { useStore } from "../store.js"
 
 export default forwardRef(function Canvas({ isPanning, setIsPanning, setCameraScale }, ref) {
-  const phys = useRunner(({ phys }) => phys)
+  const phys = useStore(({ phys }) => phys)
   const canvasRef = useRef()
   const [movingOrigin, setMovingOrigin] = useState()
   const [pan, setPan] = useState({ x: 0, y: 0 })

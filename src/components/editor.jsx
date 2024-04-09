@@ -1,15 +1,21 @@
-import { useRunner } from "../runner.js"
+import { useStore } from "../store.js"
 import MonacoEditor from "@monaco-editor/react"
 
-export default function Editor() {
-  const { code, setCode } = useRunner(({ code, setCode }) => ({
+export default function Editor({ id }) {
+  const { code, setCode } = useStore(({ code, setCode }) => ({
     code,
     setCode,
   }))
 
   return (
     <MonacoEditor
-      value={code}
+      beforeMount={monaco => {
+        monaco.editor.addKeybindingRules([{
+          keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyY,
+          command: "editor.action.deleteLines"
+        }])
+      }}
+      value={code[id]}
       language={"cpp"}
       theme="vs-dark"
       wrapperProps={{
@@ -22,7 +28,7 @@ export default function Editor() {
         fontSize: 18,
         wordWrap: "on",
       }}
-      onChange={code => setCode(code)}
+      onChange={code => setCode(id, code)}
     />
   )
 }

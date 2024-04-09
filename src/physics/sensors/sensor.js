@@ -1,21 +1,22 @@
-import { m } from "./utils.js"
-import { k, offsetX, offsetY } from "./main.js"
-import { context } from "./worker.js"
+import { m } from "../utils.js"
+import { k, offsetX, offsetY } from "../main.js"
+import { context } from "../worker.js"
 
 export default class Sensor {
-  width = 0.031
-  height = 0.031
+  width = 0.03
+  height = 0.03
 
   constructor(slot, car, img) {
     this.slot = slot
     this.car = car
-    img.then(loaded => (this.img = loaded))
+    if (img) img.then(loaded => (this.img = loaded))
   }
 
   get insidePosition() {
     return {
-      1: m(0.016, 0.0926),
-      2: m(-0.016, 0.0926),
+      1: m(0.015, 0.0808),
+      2: m(-0.015, 0.0808),
+      3: m(0, 0.0451),
     }[this.slot]
   }
 

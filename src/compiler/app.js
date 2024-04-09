@@ -51,6 +51,7 @@ export class App {
         return exn.code
       }
 
+
       let msg = `\x1b[91mError: ${exn.message}\n${exn.stack}\x1b[0m\n`
       this.memfs.hostWrite(msg)
 

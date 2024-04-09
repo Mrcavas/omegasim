@@ -1,5 +1,7 @@
-import { addListener, car, carWidth, engine, renderVector } from "./main.js"
+import { addListener, car, carWidth, renderVector } from "./main.js"
 import { m, PX2M, v } from "./utils.js"
+import { updateAccelX, updateAccelY, updateGyroZ } from "./worker.js"
+import { Body } from "matter-js"
 
 export const n = v => v / 200 // convert to newtons
 
@@ -28,25 +30,24 @@ export function tick(delta, time) {
 
   if (time === 0) {
     addListener("setMotorLeft", pwm => {
-      pwm = Math.min(100, Math.max(-100, pwm))
+      pwm = Math.min(255, Math.max(-255, pwm)) / 255 * 100
       leftVoltage = pwmToVoltage(pwm)
     })
     addListener("setMotorRight", pwm => {
-      pwm = Math.min(100, Math.max(-100, pwm))
+      pwm = Math.min(255, Math.max(-255, pwm)) / 255 * 100
       rightVoltage = pwmToVoltage(pwm)
     })
+    addListener("setServo", angle => car.slots[3].setAngle(angle))
   }
 
-  const leftPos = m(-carWidth / 2, 0)
+  const leftPos = m(-carWidth / 2, -0.012)
     .rotate(car.angle)
     .add(car.position)
-  const rightPos = m(carWidth / 2, 0)
+  const rightPos = m(carWidth / 2, -0.012)
     .rotate(car.angle)
     .add(car.position)
 
-  const dir = v(0, 1).rotate(car.angle)
-  const vel = car.velocity.mult(PX2M)
-  const vel_dir_prev = vel.dot(dir)
+  const vel_dir_prev = car.velocity.mult(PX2M).rotate(-car.angle).y
   let vel_dir_pred = 2 * vel_dir_prev - last_vel_dir
   last_vel_dir = vel_dir_prev
   if (-min_vel < vel_dir_pred && vel_dir_pred < min_vel) vel_dir_pred = min_vel
@@ -66,19 +67,15 @@ export function tick(delta, time) {
 
   car.applyForce(leftPos, leftForceVec)
   car.applyForce(rightPos, rightForceVec)
-
-  // console.log(car.torque)
-  // car.torque *= 1.55
-  // car.torque *= 3
 }
 
 export function afterTick(delta, time) {
   Object.values(car.slots).forEach(sensor => sensor?.afterTick && sensor.afterTick(delta, time))
 
-  const leftPos = m(-carWidth / 2, 0)
+  const leftPos = m(-carWidth / 2, -0.012)
     .rotate(car.angle)
     .add(car.position)
-  const rightPos = m(carWidth / 2, 0)
+  const rightPos = m(carWidth / 2, -0.012)
     .rotate(car.angle)
     .add(car.position)
 

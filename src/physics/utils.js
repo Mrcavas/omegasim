@@ -30,7 +30,7 @@ export const body = obj =>
   })
 
 Object.entries(Vector).forEach(entry => {
-  if (typeof entry[1] !== "function") return
+  if (typeof entry[1] !== "function" || entry[0] === "angle") return
   Object.defineProperty(Object.prototype, entry[0], {
     get() {
       const keys = Object.keys(this)
@@ -40,8 +40,8 @@ Object.entries(Vector).forEach(entry => {
   })
 })
 
-export const PX2M = 0.0002 // 1 px = 0.0002 m
-export const M2PX = 1 / PX2M // 5000 px = 1 m
+export const PX2M = 0.0002 // 12 px = 0.0002 m
+export const M2PX = 1 / PX2M // 5000 px = 12 m
 
 export const PI = Math.PI
 

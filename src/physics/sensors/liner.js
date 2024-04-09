@@ -1,34 +1,22 @@
-import Sensor from "../sensors.js"
-import { linePositionMargined, renderVector } from "../main.js"
+import Sensor from "./sensor.js"
+import { distData, distHeight, distWidth, linePositionMargined, renderVector } from "../main.js"
 import liner_png from "/liner.png?url"
-import dist_png from "/line_dist.png?url"
-import { v } from "../utils.js"
-import { UPNG } from "../../assets/UPNG.js"
 import { updateLine1, updateLine2 } from "../worker.js"
+import { v } from "../utils.js"
 
-let liner_img = fetch(liner_png)
+let linerImg = fetch(liner_png)
   .then(res => res.blob())
   .then(blob => createImageBitmap(blob))
 
-let dist_data, width, height
-fetch(dist_png)
-  .then(res => res.arrayBuffer())
-  .then(buf => {
-    const img = UPNG.decode(buf)
-    dist_data = new Uint8Array(UPNG.toRGBA8(img)[0])
-    width = img.width
-    height = img.height
-  })
-
 export default class Liner extends Sensor {
   constructor(slot, car, id) {
-    super(slot, car, liner_img)
+    super(slot, car, linerImg)
     this.id = id
   }
 
   getColorOn(x, y) {
-    if (0 > x || x > width - 1 || 0 > y || y > height - 1) return 0
-    return dist_data[(y * width + x) * 4]
+    if (!distData || 0 > x || x > distWidth - 1 || 0 > y || y > distHeight - 1) return 0
+    return distData[(y * distWidth + x) * 4]
   }
 
   valueFromColor(color) {
@@ -42,11 +30,11 @@ export default class Liner extends Sensor {
     const pos = this.position.sub(linePositionMargined)
     const x = Math.round(pos.x),
       y = Math.round(pos.y)
-    if (this.id === 1) updateLine1(this.valueFromColor(this.getColorOn(x, y)))
-    if (this.id === 2) updateLine2(this.valueFromColor(this.getColorOn(x, y)))
+    if (this.id === 1) updateLine1(this.valueFromColor(this.getColorOn(x, y)) + Math.round(Math.random() * 10 - 5))
+    if (this.id === 2) updateLine2(this.valueFromColor(this.getColorOn(x, y)) + Math.round(Math.random() * 10 - 5))
   }
 
   afterTick(delta, time) {
-    renderVector(this.position, v(0, 0))
+    renderVector(this.position, v())
   }
 }

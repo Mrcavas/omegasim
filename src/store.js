@@ -3,27 +3,47 @@ import { persist } from "zustand/middleware"
 import CppWorker from "./compiler/worker.js?worker"
 import PhysWorker from "./physics/worker?worker"
 
-const defaultCode = `#include <Omega.h>
+const defaultCode = [`#include <Omega.h>
 
-void setup() {}
+int main() {
+  while (true) {  
+    auto liner1 = getLineSensor(1);
+    auto liner2 = getLineSensor(2);
 
-void loop() {
-  auto liner1 = getLineSensor(1);
-  auto liner2 = getLineSensor(2);
+    auto liner1OnLine = liner1 >= 540;
+    auto liner2OnLine = liner2 >= 540;
 
-  auto liner1OnLine = liner1 >= 0.6;
-  auto liner2OnLine = liner2 >= 0.6;
-
-  if (!liner1OnLine && !liner2OnLine) {
-    setMotors(35, 35);
+    if (!liner1OnLine && !liner2OnLine) {
+      setMotors(90, 90);
+    }
+    if (liner1OnLine && !liner2OnLine) {
+      setMotors(230, -127);
+    }
+    if (!liner1OnLine && liner2OnLine) {
+      setMotors(-127, 230);
+    }
+    
+    tick();  
   }
-  if (liner1OnLine && !liner2OnLine) {
-    setMotors(90, -50);
+
+  return 0;
+}`, `#include <Omega.h>
+
+int main() {
+  while (true) {
+    tick(); 
   }
-  if (!liner1OnLine && liner2OnLine) {
-    setMotors(-50, 90);
+
+  return 0;
+}`, `#include <Omega.h>
+
+int main() {
+  while (true) {
+    tick(); 
   }
-}`
+
+  return 0;
+}`]
 
 const messageHandler = (set, get) => event => {
   if (!get()) return
@@ -54,7 +74,7 @@ const messageHandler = (set, get) => event => {
   if (event.data.id === "slow_speed") onSlowSpeed()
 }
 
-export const useRunner = create(
+export const useStore = create(
   persist(
     (set, get) => ({
       cpp: null,
@@ -68,10 +88,13 @@ export const useRunner = create(
       clearLogs: null,
       setClearLogs: clearLogs => set({ ...get(), clearLogs }),
       code: defaultCode,
-      setCode: code => set({ ...get(), code }),
+      setCode: (id, newCode) => set(state => {
+        state.code[id] = newCode
+        return { ...state }
+      }),
       sharedBuffer: null,
       moduleCache: {},
-      initPhys(canvas) {
+      initPhys(canvas, levelId) {
         set(state => {
           const phys = new PhysWorker()
           const physChannel = new MessageChannel()
@@ -84,6 +107,7 @@ export const useRunner = create(
               data: physChannel.port2,
               canvas: offscreenCanvas,
               buffer: state.sharedBuffer,
+              levelId
             },
             [physChannel.port2, offscreenCanvas]
           )
@@ -112,18 +136,18 @@ export const useRunner = create(
           }
         })
       },
-      init(canvas) {
+      init(canvas, levelId) {
         // eslint-disable-next-line no-undef
         console.log("can use shared memory:", crossOriginIsolated)
         const { initPhys, initCpp, onWrite } = get()
 
         set(state => ({
           ...state,
-          sharedBuffer: new SharedArrayBuffer(31),
+          sharedBuffer: new SharedArrayBuffer(46),
         }))
 
         onWrite(`\x1b[1;92m>\x1b[0m Initializing Physics Engine (powered by Matter.js)\n`)
-        initPhys(canvas)
+        initPhys(canvas, levelId)
         initCpp()
       },
       restart(type) {
@@ -139,14 +163,14 @@ export const useRunner = create(
         cpp.port.close()
         initCpp()
       },
-      runCode() {
+      runCode(id) {
         const { code, cpp } = get()
-        cpp.port.postMessage({ id: "run_code", data: code })
+        cpp.port.postMessage({ id: "run_code", data: code[id] })
       },
     }),
     {
-      name: "runner-store",
-      version: 13,
+      name: "omegasim",
+      version: 15,
       partialize: state => ({ code: state.code }),
     }
   )

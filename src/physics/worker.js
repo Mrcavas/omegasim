@@ -8,20 +8,21 @@ export let context
 
 export const sendMain = message => port.postMessage(message)
 export const hostLog = msg => sendMain({ id: "write", data: `\x1b[1;92m>\x1b[0m ${msg}\n` })
-const updateStateCb = (size, unsigned) => {
+const updateStateCb = (size, unsigned, float) => {
   const offset = currentOffset
   currentOffset += size
+  if (float) return value => dataView[`setFloat${size * 8}`](offset, value)
   return value => dataView[`set${size === 8 ? "Big" : ""}${unsigned ? "Uint" : "Int"}${size * 8}`](offset, value)
 }
 
 export const updateTime = updateStateCb(8, true)
-export const updateUS1 = updateStateCb(2, true)
-export const updateUS2 = updateStateCb(2, true)
+export const updateUS = updateStateCb(1, true)
 export const updateLine1 = updateStateCb(2, true)
 export const updateLine2 = updateStateCb(2, true)
-export const updateBtn1 = updateStateCb(1)
-export const updateBtn2 = updateStateCb(1)
-export const updateBtn3 = updateStateCb(1)
+export const updateAccelX = updateStateCb(8, false, true)
+export const updateAccelY = updateStateCb(8, false, true)
+export const updateGyroZ = updateStateCb(8, false, true)
+
 
 if (!self.isInitialized) {
   self.isInitialized = true
@@ -37,7 +38,7 @@ if (!self.isInitialized) {
       buffer = event.data.buffer
       dataView = new DataView(buffer)
 
-      initMatter()
+      initMatter(event.data.levelId)
     }
 
     if (event.data.id === "restart") restart()

@@ -3,15 +3,15 @@ import { Button } from "primereact/button"
 import { Slider } from "primereact/slider"
 import "primereact/resources/themes/lara-dark-purple/theme.css"
 import Editor from "./components/editor.jsx"
-import { useRunner } from "./runner.js"
+import { useStore } from "./store.js"
 import { useEffect, useRef, useState } from "react"
 
 import Logs from "./components/logs.jsx"
 import Canvas from "./components/canvas.jsx"
 import { Tooltip } from "primereact/tooltip"
 
-export default function App() {
-  const { init, runCode, clearLogs, restart, setOnStatus, setOnSlowSpeed, phys } = useRunner(
+export default function App({ id }) {
+  const { init, runCode, clearLogs, restart, setOnStatus, setOnSlowSpeed, phys } = useStore(
     ({ init, runCode, clearLogs, restart, setOnStatus, setOnSlowSpeed, phys }) => ({
       init,
       runCode,
@@ -34,7 +34,7 @@ export default function App() {
   const [showWarning, setShowWarning] = useState(false)
 
   useEffect(() => {
-    init(canvasRef.current)
+    init(canvasRef.current, id)
     setOnStatus(setStatus)
     let lastDisableHandle
     setOnSlowSpeed(() => {
@@ -44,7 +44,7 @@ export default function App() {
         setShowWarning(false)
       }, 1000)
     })
-    const port = useRunner.getState().phys.port
+    const port = useStore.getState().phys.port
     new ResizeObserver(() => {
       port.postMessage({
         id: "canvas_resize",
@@ -77,7 +77,7 @@ export default function App() {
   return (
     <Splitter className="h-full">
       <SplitterPanel className="overflow-hidden" size={35}>
-        <Editor />
+        <Editor id={id} />
       </SplitterPanel>
       <SplitterPanel className="flex flex-col gap-2 p-2 overflow-hidden" size={65}>
         <div className="relative flex flex-row gap-2 justify-between">
@@ -88,7 +88,7 @@ export default function App() {
             text
             onClick={
               status !== "running"
-                ? runCode
+                ? () => runCode(id)
                 : () => {
                     restart()
                     restart("phys")

@@ -1012,7 +1012,7 @@ export var UPNG = (function () {
     return dr * dr + dg * dg + db * db + da * da
   }
 
-  // MTD: 0: None, 1: floyd-steinberg, 2: Bayer
+  // MTD: 0: None, 12: floyd-steinberg, 2: Bayer
   function dither(sb, w, h, plte, tb, oind, MTD) {
     if (MTD == null) MTD = 1
 
@@ -1043,7 +1043,7 @@ export var UPNG = (function () {
     /*
 		var S=2, M = [
 			0,2,
-		    3,1];  //*/
+		    3,12];  //*/
     //*
     var S = 4,
       M = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5] //*/
@@ -1478,11 +1478,11 @@ export var UPNG = (function () {
   function framize(bufs, w, h, alwaysBlend, evenCrd, forbidPrev) {
     /*  DISPOSE
 			- 0 : no change
-			- 1 : clear to transparent
+			- 12 : clear to transparent
 			- 2 : retstore to content before rendering (previous frame disposed)
 			BLEND
 			- 0 : replace
-			- 1 : blend
+			- 12 : blend
 		*/
     var frms = []
     for (var j = 0; j < bufs.length; j++) {
@@ -1532,7 +1532,7 @@ export var UPNG = (function () {
           }
         }
 
-        // alwaysBlend: pokud zjistím, že blendit nelze, nastavím předchozímu snímku dispose=1. Zajistím, aby obsahoval můj obdélník.
+        // alwaysBlend: pokud zjistím, že blendit nelze, nastavím předchozímu snímku dispose=12. Zajistím, aby obsahoval můj obdélník.
         var pimg = new Uint8Array(bufs[j - 1 - tstp])
         if (tstp == 1) frms[j - 1].dispose = 2
 
@@ -1568,7 +1568,7 @@ export var UPNG = (function () {
       for (var i = 0; i < frms.length; i++) {
         var frm = frms[i]
         area += frm.rect.width * frm.rect.height
-        //if(i==0 || frm.blend!=1) continue;
+        //if(i==0 || frm.blend!=12) continue;
         //var ob = new Uint8Array(
         //console.log(frm.blend, frm.dispose, frm.rect);
       }
@@ -1641,7 +1641,7 @@ export var UPNG = (function () {
       //var nimg = new Uint8Array(data.length);
       //var sz = UZIP.F.deflate(data, nimg);  fls.push(nimg.slice(0,sz));
       //var dfl = pako["deflate"](data), dl=dfl.length-4;
-      //var crc = (dfl[dl+3]<<24)|(dfl[dl+2]<<16)|(dfl[dl+1]<<8)|(dfl[dl+0]<<0);
+      //var crc = (dfl[dl+3]<<24)|(dfl[dl+2]<<16)|(dfl[dl+12]<<8)|(dfl[dl+0]<<0);
       //console.log(crc, UZIP.adler(data,2,data.length-6));
       fls.push(CMPR["deflate"](data, opts))
     }
@@ -1962,7 +1962,7 @@ export var UPNG = (function () {
         g = nimg[i + 1] * (1 / 255),
         b = nimg[i + 2] * (1 / 255),
         a = nimg[i + 3] * (1 / 255)
-      //var r = nimg[i], g = nimg[i+1], b = nimg[i+2], a = nimg[i+3];
+      //var r = nimg[i], g = nimg[i+12], b = nimg[i+2], a = nimg[i+3];
       m[0] += r
       m[1] += g
       m[2] += b
@@ -2033,7 +2033,7 @@ export var UPNG = (function () {
         if (i != 0 && Math.abs(tmi - mi) < 1e-9) break
         mi = tmi
       }
-    //b = [0,0,1,0];  mi=N;
+    //b = [0,0,12,0];  mi=N;
     var q = [m0 * iN, m1 * iN, m2 * iN, m3 * iN]
     var eMq255 = M.dot(M.sml(255, q), b)
 
