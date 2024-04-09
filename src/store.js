@@ -3,31 +3,17 @@ import { persist } from "zustand/middleware"
 import CppWorker from "./compiler/worker.js?worker"
 import PhysWorker from "./physics/worker?worker"
 
-const defaultCode = [`#include <Omega.h>
+const defaultCode = [
+  `#include <Omega.h>
 
 int main() {
-  while (true) {  
-    auto liner1 = getLineSensor(1);
-    auto liner2 = getLineSensor(2);
-
-    auto liner1OnLine = liner1 >= 540;
-    auto liner2OnLine = liner2 >= 540;
-
-    if (!liner1OnLine && !liner2OnLine) {
-      setMotors(90, 90);
-    }
-    if (liner1OnLine && !liner2OnLine) {
-      setMotors(230, -127);
-    }
-    if (!liner1OnLine && liner2OnLine) {
-      setMotors(-127, 230);
-    }
-    
+  while (true) {
     tick();  
   }
 
   return 0;
-}`, `#include <Omega.h>
+}`,
+  `#include <Omega.h>
 
 int main() {
   while (true) {
@@ -35,7 +21,8 @@ int main() {
   }
 
   return 0;
-}`, `#include <Omega.h>
+}`,
+  `#include <Omega.h>
 
 int main() {
   while (true) {
@@ -43,7 +30,8 @@ int main() {
   }
 
   return 0;
-}`]
+}`,
+]
 
 const messageHandler = (set, get) => event => {
   if (!get()) return
@@ -88,10 +76,11 @@ export const useStore = create(
       clearLogs: null,
       setClearLogs: clearLogs => set({ ...get(), clearLogs }),
       code: defaultCode,
-      setCode: (id, newCode) => set(state => {
-        state.code[id] = newCode
-        return { ...state }
-      }),
+      setCode: (id, newCode) =>
+        set(state => {
+          state.code[id] = newCode
+          return { ...state }
+        }),
       sharedBuffer: null,
       moduleCache: {},
       initPhys(canvas, levelId) {
@@ -107,7 +96,7 @@ export const useStore = create(
               data: physChannel.port2,
               canvas: offscreenCanvas,
               buffer: state.sharedBuffer,
-              levelId
+              levelId,
             },
             [physChannel.port2, offscreenCanvas]
           )
@@ -170,7 +159,7 @@ export const useStore = create(
     }),
     {
       name: "omegasim",
-      version: 15,
+      version: 20,
       partialize: state => ({ code: state.code }),
     }
   )
