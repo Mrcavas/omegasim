@@ -2,7 +2,7 @@ import Sensor from "./sensor.js"
 import { distData, distHeight, distWidth, linePositionMargined, renderVector } from "../main.js"
 import liner_png from "/liner.png?url"
 import { updateLine1, updateLine2 } from "../worker.js"
-import { v } from "../utils.js"
+import { m, v } from "../utils.js"
 
 let linerImg = fetch(liner_png)
   .then(res => res.blob())
@@ -35,6 +35,6 @@ export default class Liner extends Sensor {
   }
 
   afterTick(delta, time) {
-    renderVector(this.position, v())
+    renderVector(this.position, m(0, 0))
   }
 }

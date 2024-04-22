@@ -1,7 +1,7 @@
 import { Bodies, Body, Composite, Engine } from "matter-js"
 import { canvas, context, sendMain, updateAccelX, updateAccelY, updateGyroZ, updateTime } from "./worker.js"
 import { body, m, PI, PX2M, v } from "./utils.js"
-import { resetForces, tick } from "./tick.js"
+import { afterTick, resetForces, tick } from "./tick.js"
 import car_png from "/car.png?url"
 import line0_png from "/0/line.png?url"
 import line1_png from "/12/line.png?url"
@@ -262,7 +262,7 @@ export function initMatter(id) {
 
     lastVel = vel
 
-    // afterTick(delta, engine.timing.timestamp)
+    afterTick(delta, engine.timing.timestamp)
   })
 }
 

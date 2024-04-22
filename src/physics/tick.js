@@ -30,20 +30,20 @@ export function tick(delta, time) {
 
   if (time === 0) {
     addListener("setMotorLeft", pwm => {
-      pwm = Math.min(255, Math.max(-255, pwm)) / 255 * 100
+      pwm = (Math.min(255, Math.max(-255, pwm)) / 255) * 100
       leftVoltage = pwmToVoltage(pwm)
     })
     addListener("setMotorRight", pwm => {
-      pwm = Math.min(255, Math.max(-255, pwm)) / 255 * 100
+      pwm = (Math.min(255, Math.max(-255, pwm)) / 255) * 100
       rightVoltage = pwmToVoltage(pwm)
     })
     addListener("setServo", angle => car.slots[3].setAngle(angle))
   }
 
-  const leftPos = m(-carWidth / 2, -0.012)
+  const leftPos = m(carWidth / 2, -0.012)
     .rotate(car.angle)
     .add(car.position)
-  const rightPos = m(carWidth / 2, -0.012)
+  const rightPos = m(-carWidth / 2, -0.012)
     .rotate(car.angle)
     .add(car.position)
 
@@ -72,10 +72,10 @@ export function tick(delta, time) {
 export function afterTick(delta, time) {
   Object.values(car.slots).forEach(sensor => sensor?.afterTick && sensor.afterTick(delta, time))
 
-  const leftPos = m(-carWidth / 2, -0.012)
+  const leftPos = m(carWidth / 2, -0.012)
     .rotate(car.angle)
     .add(car.position)
-  const rightPos = m(carWidth / 2, -0.012)
+  const rightPos = m(-carWidth / 2, -0.012)
     .rotate(car.angle)
     .add(car.position)
 
