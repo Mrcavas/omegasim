@@ -262,7 +262,7 @@ export function initMatter(id) {
 
     lastVel = vel
 
-    afterTick(delta, engine.timing.timestamp)
+    // afterTick(delta, engine.timing.timestamp)
   })
 }
 
