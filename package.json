@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "dev": "yarn vite",
+    "build": "yarn vite build",
+    "lint": "yarn eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "yarn vite preview"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",

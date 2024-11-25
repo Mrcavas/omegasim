@@ -1,7 +1,5 @@
 import { addListener, car, carWidth, renderVector } from "./main.js"
-import { m, PX2M, v } from "./utils.js"
-import { updateAccelX, updateAccelY, updateGyroZ } from "./worker.js"
-import { Body } from "matter-js"
+import { m, PX2M } from "./utils.js"
 
 export const n = v => v / 200 // convert to newtons
 

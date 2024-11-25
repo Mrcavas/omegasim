@@ -1,10 +1,10 @@
-import React from "react"
-import ReactDOM from "react-dom/client"
-import App from "./App.jsx"
-import "./index.css"
 import "primeicons/primeicons.css"
 import { PrimeReactProvider } from "primereact/api"
-import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom"
+import React from "react"
+import ReactDOM from "react-dom/client"
+import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import App from "./App.jsx"
+import "./index.css"
 
 const router = createBrowserRouter([
   {

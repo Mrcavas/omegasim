@@ -1,5 +1,5 @@
-import { m } from "../utils.js"
 import { k, offsetX, offsetY } from "../main.js"
+import { m } from "../utils.js"
 import { context } from "../worker.js"
 
 export default class Sensor {

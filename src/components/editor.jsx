@@ -1,5 +1,5 @@
-import { useStore } from "../store.js"
 import MonacoEditor from "@monaco-editor/react"
+import { useStore } from "../store.js"
 
 export default function Editor({ id }) {
   const { code, setCode } = useStore(({ code, setCode }) => ({
@@ -10,10 +10,12 @@ export default function Editor({ id }) {
   return (
     <MonacoEditor
       beforeMount={monaco => {
-        monaco.editor.addKeybindingRules([{
-          keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyY,
-          command: "editor.action.deleteLines"
-        }])
+        monaco.editor.addKeybindingRules([
+          {
+            keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyY,
+            command: "editor.action.deleteLines",
+          },
+        ])
       }}
       value={code[id]}
       language={"cpp"}

@@ -1,8 +1,8 @@
-import { useStore } from "../store.js"
-import { useEffect, useState } from "react"
 import Ansi from "ansi-to-html"
+import { useEffect, useState } from "react"
+import { useStore } from "../store.js"
 
-const MAX_LENGTH = 5000;
+const MAX_LENGTH = 5000
 
 export default function Logs({ className }) {
   const { setOnWrite, setClearLogs } = useStore(({ setOnWrite, setClearLogs }) => ({ setOnWrite, setClearLogs }))

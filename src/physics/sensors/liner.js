@@ -1,8 +1,8 @@
-import Sensor from "./sensor.js"
 import { distData, distHeight, distWidth, linePositionMargined, renderVector } from "../main.js"
-import liner_png from "/liner.png?url"
+import { m } from "../utils.js"
 import { updateLine1, updateLine2 } from "../worker.js"
-import { m, v } from "../utils.js"
+import Sensor from "./sensor.js"
+import liner_png from "/liner.png?url"
 
 let linerImg = fetch(liner_png)
   .then(res => res.blob())

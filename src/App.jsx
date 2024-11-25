@@ -1,14 +1,14 @@
-import { Splitter, SplitterPanel } from "primereact/splitter"
 import { Button } from "primereact/button"
-import { Slider } from "primereact/slider"
 import "primereact/resources/themes/lara-dark-purple/theme.css"
+import { Slider } from "primereact/slider"
+import { Splitter, SplitterPanel } from "primereact/splitter"
+import { useEffect, useRef, useState } from "react"
 import Editor from "./components/editor.jsx"
 import { useStore } from "./store.js"
-import { useEffect, useRef, useState } from "react"
 
-import Logs from "./components/logs.jsx"
-import Canvas from "./components/canvas.jsx"
 import { Tooltip } from "primereact/tooltip"
+import Canvas from "./components/canvas.jsx"
+import Logs from "./components/logs.jsx"
 
 export default function App({ id }) {
   const { init, runCode, clearLogs, restart, setOnStatus, setOnSlowSpeed, phys } = useStore(

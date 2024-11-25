@@ -1,8 +1,8 @@
-import Sensor from "./sensor.js"
+import { raycast } from "../../assets/raycast.js"
 import { k, offsetX, offsetY, renderVector } from "../main.js"
 import { m, PX2M, v } from "../utils.js"
 import { context, updateUS } from "../worker.js"
-import { raycast } from "../../assets/raycast.js"
+import Sensor from "./sensor.js"
 import base_png from "/echo-base.png"
 import us_png from "/echo-mes.png"
 
@@ -21,7 +21,7 @@ export default class USMeter extends Sensor {
   maxDistance = 2
   angle = 0
   target = 0
-  vel = 160 / 1.5 / 180 * Math.PI
+  vel = (160 / 1.5 / 180) * Math.PI
 
   constructor(car, bodies) {
     super(3, car, new Promise(() => {}))
@@ -29,7 +29,7 @@ export default class USMeter extends Sensor {
   }
 
   tick(delta, time) {
-    const dAngle = this.vel * delta / 1000
+    const dAngle = (this.vel * delta) / 1000
     if (this.angle < this.target) {
       this.angle = Math.min(this.target, this.angle + dAngle)
     }
@@ -46,7 +46,7 @@ export default class USMeter extends Sensor {
   }
 
   setAngle(newAngle) {
-    this.target = Math.min(80, Math.max(-80, newAngle)) / 180 * Math.PI
+    this.target = (Math.min(80, Math.max(-80, newAngle)) / 180) * Math.PI
   }
 
   get startPos() {

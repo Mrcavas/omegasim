@@ -23,7 +23,6 @@ export const updateAccelX = updateStateCb(8, false, true)
 export const updateAccelY = updateStateCb(8, false, true)
 export const updateGyroZ = updateStateCb(8, false, true)
 
-
 if (!self.isInitialized) {
   self.isInitialized = true
   self.addEventListener("message", async function messageHandler(event) {

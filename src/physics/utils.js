@@ -40,8 +40,8 @@ Object.entries(Vector).forEach(entry => {
   })
 })
 
-export const PX2M = 0.0002 // 12 px = 0.0002 m
-export const M2PX = 1 / PX2M // 5000 px = 12 m
+export const PX2M = 0.0002 // 1 px = 0.0002 m
+export const M2PX = 1 / PX2M // 5000 px = 1 m
 
 export const PI = Math.PI
 
