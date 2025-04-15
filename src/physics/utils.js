@@ -21,6 +21,7 @@ const bodyMethodNames = Object.entries(Body)
   .filter(entry => typeof entry[1] === "function")
   .map(entry => entry[0])
 
+// Делает, что с данным телом можно вместо Matter.Body.func(body, ...) можно просто писать body.func(...)
 export const body = obj =>
   new Proxy(obj, {
     get(target, p, receiver) {
@@ -29,6 +30,7 @@ export const body = obj =>
     },
   })
 
+// Делает, что на любом объекте с x и y можно вызывать функции из Matter.Vector: вместо Matter.Vector.func(vec, ...) можно просто писать vec.func(...)
 Object.entries(Vector).forEach(entry => {
   if (typeof entry[1] !== "function" || entry[0] === "angle") return
   Object.defineProperty(Object.prototype, entry[0], {
@@ -45,5 +47,8 @@ export const M2PX = 1 / PX2M // 5000 px = 1 m
 
 export const PI = Math.PI
 
+// создаёт пиксельный вектор
 export const v = (x, y) => ({ x: x ?? 0, y: y ?? 0 })
+
+// если один аргумент, переводит его из метров в пиксели, если два - создаёт вектор по значениям длины в метрах
 export const m = (x, y) => (y === undefined ? x * M2PX : v(x, y).mult(M2PX))

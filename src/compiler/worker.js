@@ -33,6 +33,7 @@ const readAccelX = readStateCb(8, false, true)
 const readAccelY = readStateCb(8, false, true)
 const readGyroZ = readStateCb(8, false, true)
 
+// функции, что будут доступны в коде C. Для использования нужно также их обозначить в .h файле
 const imports = {
   setMotorLeft: callPhysCb("setMotorLeft"),
   setMotorRight: callPhysCb("setMotorRight"),
